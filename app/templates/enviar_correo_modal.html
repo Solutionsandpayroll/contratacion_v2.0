@@ -1,0 +1,909 @@
+{% load static %}
+<div class="modal fade" id="modalEnviarCorreo" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content correo-modal-content">
+      <form method="POST" enctype="multipart/form-data" id="form-correo"
+            action="{% url 'enviar_correo' %}">
+        {% csrf_token %}
+        <input type="hidden" name="accion" value="enviar">
+        <input type="hidden" name="id_empleado" id="correo-id-empleado">
+
+        <!-- HEADER -->
+        <div class="correo-header">
+          <div class="correo-header-left">
+            <div class="correo-header-icon">
+              <i class="fa-solid fa-paper-plane"></i>
+            </div>
+            <div>
+              <div class="correo-header-title">Redactar correo</div>
+              <div class="correo-header-sub">Completa los campos y envía el mensaje</div>
+            </div>
+          </div>
+          <button type="button" class="correo-close-btn" data-bs-dismiss="modal" title="Cerrar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- DESTINATARIO STRIP -->
+        <div class="correo-recipient-strip">
+          <div class="correo-recipient-field">
+            <span class="correo-recipient-label"><i class="fa-solid fa-user"></i> Para</span>
+            <input class="correo-recipient-input" readonly id="correo-nombre" name="nombre_empleado" placeholder="Nombre del empleado">
+          </div>
+          <div class="correo-recipient-divider"></div>
+          <div class="correo-recipient-field correo-recipient-field--email">
+            <span class="correo-recipient-label"><i class="fa-solid fa-at"></i> Correo</span>
+            <input class="correo-recipient-input" readonly id="correo-email" name="email_destino" placeholder="correo@empresa.com">
+          </div>
+        </div>
+
+        <!-- BODY -->
+        <div class="correo-body">
+
+          <!-- COLUMNA IZQUIERDA: metadatos + adjuntos -->
+          <div class="correo-sidebar">
+
+            <div class="correo-field-group">
+              <label class="correo-label" for="estructura">
+                <i class="fa-solid fa-layer-group"></i> Plantilla
+              </label>
+              <select name="estructura" id="estructura" class="correo-select">
+                <option value="1">Solicitud de documentos</option>
+                <option value="2">Orden exámenes médicos</option>
+              </select>
+            </div>
+
+            <div class="correo-field-group">
+              <label class="correo-label" for="asunto">
+                <i class="fa-solid fa-tag"></i> Asunto
+              </label>
+              <input type="text" name="asunto" id="asunto" class="correo-input"
+                     placeholder="Escribe el asunto..." required>
+            </div>
+
+            <!-- ADJUNTOS -->
+            <div class="correo-field-group correo-field-group--grow">
+              <label class="correo-label">
+                <i class="fa-solid fa-paperclip"></i> Adjuntos
+              </label>
+              <div class="correo-drop-zone" id="dropZone">
+                <div class="correo-drop-inner">
+                  <div class="correo-drop-icon-wrap">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                  </div>
+                  <p class="correo-drop-text" id="uploadText">
+                    Arrastra archivos aquí<br>
+                    <span>o haz clic para seleccionar</span>
+                  </p>
+                </div>
+                <input type="file" name="adjuntos" id="adjuntos" multiple style="display:none;">
+              </div>
+              <ul id="fileList" class="correo-file-list"></ul>
+            </div>
+
+          </div>
+
+          <!-- COLUMNA DERECHA: editor custom -->
+          <div class="correo-editor-col">
+            <div class="correo-field-group correo-field-group--grow">
+              <label class="correo-label">
+                <i class="fa-solid fa-pen-nib"></i> Cuerpo del correo
+              </label>
+              <!-- textarea oculto enviado con el form -->
+              <textarea name="cuerpo_html" id="cuerpo_html" style="display:none;"></textarea>
+              <!-- Editor custom (sin Summernote) -->
+              <div class="ce-editor-wrap">
+                <div class="ce-toolbar">
+                  <div class="ce-toolbar-group">
+                    <button type="button" class="ce-btn" data-cmd="bold" title="Negrita"><i class="fa-solid fa-bold"></i></button>
+                    <button type="button" class="ce-btn" data-cmd="italic" title="Cursiva"><i class="fa-solid fa-italic"></i></button>
+                    <button type="button" class="ce-btn" data-cmd="underline" title="Subrayado"><i class="fa-solid fa-underline"></i></button>
+                    <button type="button" class="ce-btn" data-cmd="strikeThrough" title="Tachado"><i class="fa-solid fa-strikethrough"></i></button>
+                  </div>
+                  <div class="ce-toolbar-sep"></div>
+                  <div class="ce-toolbar-group">
+                    <button type="button" class="ce-btn" data-cmd="insertUnorderedList" title="Lista"><i class="fa-solid fa-list-ul"></i></button>
+                    <button type="button" class="ce-btn" data-cmd="insertOrderedList" title="Lista numerada"><i class="fa-solid fa-list-ol"></i></button>
+                  </div>
+                  <div class="ce-toolbar-sep"></div>
+                  <div class="ce-toolbar-group">
+                    <button type="button" class="ce-btn" data-cmd="justifyLeft" title="Izquierda"><i class="fa-solid fa-align-left"></i></button>
+                    <button type="button" class="ce-btn" data-cmd="justifyCenter" title="Centro"><i class="fa-solid fa-align-center"></i></button>
+                    <button type="button" class="ce-btn" data-cmd="justifyRight" title="Derecha"><i class="fa-solid fa-align-right"></i></button>
+                  </div>
+                  <div class="ce-toolbar-sep"></div>
+                  <div class="ce-toolbar-group">
+                    <button type="button" class="ce-btn" id="ce-link-btn" title="Insertar enlace"><i class="fa-solid fa-link"></i></button>
+                    <button type="button" class="ce-btn" data-cmd="removeFormat" title="Limpiar formato"><i class="fa-solid fa-eraser"></i></button>
+                  </div>
+                </div>
+                <div class="ce-editable" id="ce-editable" contenteditable="true" spellcheck="true"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <div class="correo-footer">
+          <div class="correo-footer-meta">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>El correo se enviará desde el servidor configurado</span>
+          </div>
+          <div class="correo-footer-actions">
+            <button type="button" class="correo-btn correo-btn--cancel" data-bs-dismiss="modal">
+              <i class="fa-solid fa-xmark"></i> Cancelar
+            </button>
+            <button type="submit" class="correo-btn correo-btn--send" id="btn-enviar-correo">
+              <span class="correo-btn-spinner" id="correo-spinner" style="display:none;">
+                <span class="correo-spin-ring"></span>
+              </span>
+              <i class="fa-solid fa-paper-plane" id="correo-send-icon"></i>
+              <span id="correo-send-label">Enviar correo</span>
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY ENVIANDO -->
+<div id="correo-sending-overlay" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(22,43,71,.45); backdrop-filter:blur(4px); align-items:center; justify-content:center;">
+  <div class="correo-sending-box">
+    <div class="correo-sending-ring-wrap">
+      <svg class="correo-ring-svg" viewBox="0 0 56 56">
+        <circle class="correo-ring-track" cx="28" cy="28" r="22" fill="none" stroke-width="4"/>
+        <circle class="correo-ring-arc"   cx="28" cy="28" r="22" fill="none" stroke-width="4"/>
+      </svg>
+      <i class="fa-solid fa-paper-plane correo-sending-icon"></i>
+    </div>
+    <div class="correo-sending-title">Enviando correo…</div>
+    <div class="correo-sending-sub">Por favor espera un momento</div>
+  </div>
+</div>
+
+<style>
+/* ══════════════════════════════════════════
+   CORREO MODAL — sistema de diseño RRHH
+══════════════════════════════════════════ */
+
+/* ── Contenedor base ── */
+.correo-modal-content {
+  border-radius: 16px !important;
+  border: none !important;
+  overflow: hidden !important;
+  box-shadow: 0 24px 64px rgba(22,43,71,.22), 0 6px 20px rgba(22,43,71,.10) !important;
+}
+
+/* ── Header ── */
+.correo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+  background: linear-gradient(100deg, var(--azul-oscuro) 0%, var(--azul-medio) 100%);
+  position: relative;
+  overflow: hidden;
+}
+.correo-header::after {
+  content: '';
+  position: absolute;
+  right: -30px; top: -30px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.06);
+  pointer-events: none;
+}
+.correo-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.correo-header-icon {
+  width: 40px; height: 40px;
+  background: rgba(255,255,255,.15);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  font-size: 1rem;
+  flex-shrink: 0;
+  backdrop-filter: blur(4px);
+}
+.correo-header-title {
+  font-family: 'Calibri', 'Nunito Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #fff;
+  line-height: 1.2;
+}
+.correo-header-sub {
+  font-size: .7rem;
+  color: rgba(255,255,255,.6);
+  font-weight: 600;
+  margin-top: 2px;
+}
+.correo-close-btn {
+  background: rgba(255,255,255,.12);
+  border: none;
+  color: #fff;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: .82rem;
+  transition: background .18s, transform .2s;
+  flex-shrink: 0;
+}
+.correo-close-btn:hover {
+  background: rgba(255,255,255,.24);
+  transform: rotate(90deg);
+}
+
+/* ── Destinatario strip ── */
+.correo-recipient-strip {
+  display: flex;
+  align-items: stretch;
+  background: #f8fafc;
+  border-bottom: 1px solid #e8edf3;
+  padding: 0;
+}
+.correo-recipient-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  flex: 1;
+  min-width: 0;
+}
+.correo-recipient-field--email { flex: 1.4; }
+.correo-recipient-label {
+  font-size: .68rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .6px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.correo-recipient-label i { font-size: .7rem; color: var(--azul-medio); }
+.correo-recipient-input {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  height: auto !important;
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 700;
+  font-size: .84rem;
+  color: var(--azul-oscuro);
+  outline: none !important;
+  box-shadow: none !important;
+  min-width: 0;
+  width: 100%;
+  cursor: default;
+}
+.correo-recipient-divider {
+  width: 1px;
+  background: #e0e5ec;
+  margin: 10px 0;
+  flex-shrink: 0;
+}
+
+/* ── Body: layout dos columnas ── */
+.correo-body {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 0;
+  min-height: 400px;
+}
+@media (max-width: 900px) {
+  .correo-body { grid-template-columns: 1fr; }
+}
+
+/* ── Sidebar izquierda ── */
+.correo-sidebar {
+  background: #f8fafc;
+  border-right: 1px solid #e8edf3;
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Columna editor ── */
+.correo-editor-col {
+  padding: 20px 20px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Field group ── */
+.correo-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.correo-field-group--grow {
+  flex: 1;
+}
+
+/* ── Labels ── */
+.correo-label {
+  font-size: .68rem;
+  font-weight: 800;
+  color: var(--azul-oscuro);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.correo-label i {
+  font-size: .7rem;
+  color: var(--azul-medio);
+  opacity: .8;
+  width: 12px;
+  text-align: center;
+}
+
+/* ── Inputs & selects ── */
+.correo-input,
+.correo-select {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  background: #fff;
+  border: 1.5px solid #dde3ec;
+  border-radius: 8px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-weight: 600;
+  font-size: .8rem;
+  color: var(--azul-oscuro);
+  outline: none;
+  transition: border-color .18s, box-shadow .18s, background .18s;
+  box-shadow: 0 1px 3px rgba(22,43,71,.04);
+}
+.correo-input::placeholder { color: #a8bac8; font-weight: 500; }
+.correo-input:focus,
+.correo-select:focus {
+  border-color: var(--azul-medio);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(16,87,136,.1);
+}
+.correo-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='%23162b47'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+  cursor: pointer;
+}
+
+/* ── Drop zone adjuntos ── */
+.correo-drop-zone {
+  border: 1.5px dashed #c8d4e0;
+  border-radius: 10px;
+  padding: 18px 12px 14px;
+  text-align: center;
+  cursor: pointer;
+  background: #fff;
+  transition: border-color .18s, background .18s, transform .18s;
+}
+.correo-drop-zone:hover,
+.correo-drop-zone.dragover {
+  border-color: var(--azul-medio);
+  background: rgba(16,87,136,.04);
+  transform: scale(1.01);
+}
+.correo-drop-inner { pointer-events: none; }
+.correo-drop-icon-wrap {
+  width: 36px; height: 36px;
+  background: rgba(16,87,136,.08);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.correo-drop-icon-wrap i {
+  font-size: .95rem;
+  color: var(--azul-medio);
+}
+.correo-drop-text {
+  font-size: .75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+.correo-drop-text span {
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: .7rem;
+}
+
+/* ── File list ── */
+.correo-file-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.correo-file-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border: 1px solid #e0e8f0;
+  border-radius: 7px;
+  padding: 5px 10px;
+  font-size: .74rem;
+  font-weight: 700;
+  color: var(--azul-oscuro);
+  transition: background .15s, border-color .15s;
+  gap: 8px;
+}
+.correo-file-list li:hover {
+  background: rgba(16,87,136,.05);
+  border-color: var(--azul-medio);
+}
+.correo-file-list li i.fa-file {
+  color: var(--azul-medio);
+  font-size: .8rem;
+  flex-shrink: 0;
+}
+.correo-file-list li span.file-name-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.remove-file {
+  cursor: pointer;
+  color: var(--rojo);
+  font-size: .8rem;
+  font-weight: 800;
+  width: 20px; height: 20px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: background .15s, color .15s;
+}
+.remove-file:hover {
+  background: var(--rojo-10);
+  color: #a31038;
+}
+
+/* ── Custom Editor ── */
+.ce-editor-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border: 1.5px solid #dde3ec;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  transition: border-color .18s, box-shadow .18s;
+}
+.ce-editor-wrap:focus-within {
+  border-color: var(--azul-medio);
+  box-shadow: 0 0 0 3px rgba(16,87,136,.08);
+}
+.ce-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-wrap: wrap;
+  padding: 6px 10px;
+  background: #f5f7fa;
+  border-bottom: 1px solid #e4eaf2;
+}
+.ce-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+.ce-toolbar-sep {
+  width: 1px;
+  height: 18px;
+  background: #dde3ec;
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+.ce-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 5px;
+  color: var(--text-secondary);
+  font-size: .76rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+  padding: 0;
+  flex-shrink: 0;
+}
+.ce-btn:hover {
+  background: rgba(16,87,136,.1);
+  color: var(--azul-medio);
+}
+.ce-btn.active {
+  background: var(--azul-medio);
+  color: #fff;
+}
+.ce-editable {
+  flex: 1;
+  min-height: 280px;
+  padding: 14px 16px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: .86rem;
+  color: var(--azul-oscuro);
+  line-height: 1.65;
+  outline: none;
+  overflow-y: auto;
+  background: #fff;
+}
+.ce-editable:empty::before {
+  content: attr(data-placeholder);
+  color: #a8bac8;
+  pointer-events: none;
+}
+.ce-editable ul, .ce-editable ol {
+  padding-left: 1.5rem;
+}
+.ce-editable p { margin: 0 0 .5em; }
+
+/* ── Footer ── */
+.correo-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 22px;
+  background: #f8fafc;
+  border-top: 1px solid #e8edf3;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.correo-footer-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.correo-footer-meta i {
+  font-size: .75rem;
+  color: #8da4b8;
+}
+.correo-footer-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ── Botones footer ── */
+.correo-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'Nunito Sans', sans-serif;
+  font-size: .79rem;
+  font-weight: 800;
+  cursor: pointer;
+  letter-spacing: .2px;
+  transition: background .18s, box-shadow .18s, transform .18s;
+  white-space: nowrap;
+}
+.correo-btn i { font-size: .8rem; flex-shrink: 0; }
+
+.correo-btn--cancel {
+  background: #e8edf4;
+  color: var(--text-secondary);
+}
+.correo-btn--cancel:hover {
+  background: #d8dfe8;
+  color: var(--azul-oscuro);
+}
+
+.correo-btn--send {
+  background: var(--azul-medio);
+  color: #fff;
+  box-shadow: 0 3px 10px rgba(16,87,136,.25);
+}
+.correo-btn--send:hover {
+  background: var(--azul-oscuro);
+  box-shadow: 0 6px 18px rgba(16,87,136,.35);
+  transform: translateY(-1px);
+}
+.correo-btn--send:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(16,87,136,.2);
+}
+
+/* ── Spinner en botón ── */
+.correo-btn--send.sending {
+  pointer-events: none;
+  opacity: .88;
+  background: var(--azul-oscuro) !important;
+  transform: none !important;
+  box-shadow: 0 3px 10px rgba(22,43,71,.25) !important;
+}
+.correo-spin-ring {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: correo-spin .7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes correo-spin { to { transform: rotate(360deg); } }
+
+/* ── Overlay enviando ── */
+.correo-sending-overlay-active {
+  display: flex !important;
+}
+.correo-sending-box {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2.4rem 2.8rem 2rem;
+  text-align: center;
+  box-shadow: 0 32px 64px rgba(22,43,71,.22), 0 8px 24px rgba(22,43,71,.12);
+  animation: correo-box-in .3s cubic-bezier(.34,1.4,.64,1);
+  min-width: 260px;
+}
+@keyframes correo-box-in {
+  from { opacity:0; transform: scale(.88) translateY(16px); }
+  to   { opacity:1; transform: scale(1)  translateY(0); }
+}
+.correo-sending-ring-wrap {
+  width: 72px; height: 72px;
+  margin: 0 auto 1.2rem;
+  position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.correo-ring-svg {
+  position: absolute;
+  inset: 0; width: 100%; height: 100%;
+  animation: correo-ring-rot 1.4s linear infinite;
+}
+@keyframes correo-ring-rot { to { transform: rotate(360deg); } }
+.correo-ring-track {
+  stroke: rgba(16,87,136,.12);
+}
+.correo-ring-arc {
+  stroke: var(--azul-medio);
+  stroke-linecap: round;
+  stroke-dasharray: 60 80;
+}
+.correo-sending-icon {
+  font-size: 1.6rem;
+  color: var(--azul-medio);
+  position: relative;
+  z-index: 1;
+  animation: correo-icon-pulse 1.4s ease-in-out infinite;
+}
+@keyframes correo-icon-pulse {
+  0%, 100% { opacity: 1;  transform: scale(1); }
+  50%       { opacity: .7; transform: scale(.9); }
+}
+.correo-sending-title {
+  font-family: 'Calibri', 'Nunito Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--azul-oscuro);
+  margin-bottom: .3rem;
+}
+.correo-sending-sub {
+  font-size: .76rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+</style>
+
+<script>
+/* ══════════════════════════════════════
+   CUSTOM EDITOR — sin Summernote
+══════════════════════════════════════ */
+(function() {
+  const editable = document.getElementById('ce-editable');
+  const textarea = document.getElementById('cuerpo_html');
+  if (!editable || !textarea) return;
+
+  // Sincronizar editable → textarea ANTES de que el browser valide
+  // Usamos 'submit' con capture:true para ejecutar antes de la validación nativa
+  document.getElementById('form-correo').addEventListener('submit', function(e) {
+    const html = editable.innerHTML.trim();
+    textarea.value = html;
+
+    // Validación: editor vacío
+    if (!html || html === '<br>' || html === '<p><br></p>') {
+      e.preventDefault();
+      editable.focus();
+      const wrap = editable.closest('.ce-editor-wrap');
+      if (wrap) {
+        wrap.style.borderColor = 'var(--rojo)';
+        wrap.style.boxShadow = '0 0 0 3px rgba(229,17,72,.12)';
+        setTimeout(() => { wrap.style.borderColor = ''; wrap.style.boxShadow = ''; }, 2500);
+      }
+      return false;
+    }
+
+    // ── Estado ENVIANDO ──
+    // 1. Botón: spinner + texto cambiado
+    const btn      = document.getElementById('btn-enviar-correo');
+    const spinner  = document.getElementById('correo-spinner');
+    const icon     = document.getElementById('correo-send-icon');
+    const label    = document.getElementById('correo-send-label');
+    if (btn)     btn.classList.add('sending');
+    if (spinner) spinner.style.display = 'inline-flex';
+    if (icon)    icon.style.display    = 'none';
+    if (label)   label.textContent     = 'Enviando…';
+
+    // 2. Overlay central
+    const overlay = document.getElementById('correo-sending-overlay');
+    if (overlay) overlay.style.display = 'flex';
+
+    // Deshabilitar cancelar mientras envía
+    const cancelBtn = document.querySelector('#modalEnviarCorreo .correo-btn--cancel');
+    if (cancelBtn) cancelBtn.disabled = true;
+
+  }, true);
+
+  // Botones de toolbar
+  document.querySelectorAll('.ce-btn[data-cmd]').forEach(btn => {
+    btn.addEventListener('mousedown', e => {
+      e.preventDefault();
+      document.execCommand(btn.dataset.cmd, false, null);
+      editable.focus();
+      updateActiveStates();
+    });
+  });
+
+  // Botón de enlace
+  const linkBtn = document.getElementById('ce-link-btn');
+  if (linkBtn) {
+    linkBtn.addEventListener('mousedown', e => {
+      e.preventDefault();
+      const url = prompt('URL del enlace:', 'https://');
+      if (url) document.execCommand('createLink', false, url);
+      editable.focus();
+    });
+  }
+
+  // Marcar botones activos según selección
+  function updateActiveStates() {
+    ['bold','italic','underline','strikeThrough'].forEach(cmd => {
+      const btn = document.querySelector(`.ce-btn[data-cmd="${cmd}"]`);
+      if (btn) btn.classList.toggle('active', document.queryCommandState(cmd));
+    });
+  }
+  editable.addEventListener('keyup', updateActiveStates);
+  editable.addEventListener('mouseup', updateActiveStates);
+  editable.addEventListener('selectionchange', updateActiveStates);
+  // Limpiar error visual al escribir
+  editable.addEventListener('input', () => {
+    const wrap = editable.closest('.ce-editor-wrap');
+    if (wrap) { wrap.style.borderColor = ''; wrap.style.boxShadow = ''; }
+  });
+
+  // API pública para cargar HTML en el editor (reemplaza summernote('code', html))
+  window.ceSetContent = function(html) {
+    if (editable) editable.innerHTML = html || '';
+  };
+  window.ceGetContent = function() {
+    return editable ? editable.innerHTML : '';
+  };
+})();
+
+/* ══════════════════════════════════════
+   MODAL CORREO — apertura y plantillas
+══════════════════════════════════════ */
+const plantillas = {
+  "1": {
+    asunto: "Solicitud documentación proceso de Vinculación {nombre}",
+    cuerpo: `<p>Buen día, {nombre}</p>
+<p>Reciba un cordial saludo,</p>
+<p>Mi nombre es Viviana Achury y le escribo en representación de Solutions &amp; Payroll. Hemos recibido la solicitud por parte de (EMPRESA), para presentarnos y darle a conocer los detalles relativos al proceso de su vinculación.</p>
+<p>Le agradecemos nos haga llegar los siguientes documentos, los cuales son requeridos para el proceso de contratación:</p>
+<ul><li>Formato hoja de vida S&amp;P</li></ul>
+<p>Adicionalmente, le solicitamos nos confirme su disponibilidad para comunicarnos por llamada telefónica o, si lo prefiere, por WhatsApp, con el fin de coordinar el agendamiento de los exámenes médicos requeridos para el ingreso.</p>
+<p>Quedo atento a sus comentarios.</p>`
+  },
+  "2": {
+    asunto: "Orden exámenes médicos {nombre}",
+    cuerpo: `<p>Buen día, {nombre}</p>
+<p>Espero se encuentre bien.</p>
+<p>De acuerdo a nuestra conversación, comparto la orden para presentar los exámenes médicos.</p>
+<p>Por favor llevar documento de identidad y gafas si las usa.</p>`
+  }
+};
+
+function cargarPlantillaCorreo(idEstructura, nombre) {
+  const p = plantillas[idEstructura];
+  if (!p) return;
+  document.getElementById('asunto').value = p.asunto;
+  const html = p.cuerpo.replace(/{nombre}/g, nombre || '');
+  window.ceSetContent(html);
+}
+
+function abrirModalCorreo(idEmpleado, nombreCompleto, email) {
+  document.getElementById('correo-id-empleado').value = idEmpleado;
+  document.getElementById('correo-nombre').value = nombreCompleto || '';
+  document.getElementById('correo-email').value = email || '';
+
+  // Resetear adjuntos
+  if (typeof selectedFiles !== 'undefined') { selectedFiles = []; updateFileInputAndList(); }
+
+  // Cargar plantilla 1 por defecto
+  document.getElementById('estructura').value = '1';
+  cargarPlantillaCorreo('1', nombreCompleto);
+
+  new bootstrap.Modal(document.getElementById('modalEnviarCorreo')).show();
+}
+
+document.getElementById('estructura').addEventListener('change', function() {
+  cargarPlantillaCorreo(this.value, document.getElementById('correo-nombre').value);
+});
+
+/* Adjuntos */
+const dropZone   = document.getElementById('dropZone');
+const fileInput  = document.getElementById('adjuntos');
+const fileList   = document.getElementById('fileList');
+const uploadText = document.getElementById('uploadText');
+let selectedFiles = [];
+
+dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', handleFiles);
+dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) { fileInput.files = e.dataTransfer.files; handleFiles(); }
+});
+
+function handleFiles() {
+  Array.from(fileInput.files).forEach(file => {
+    if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) selectedFiles.push(file);
+  });
+  updateFileInputAndList();
+}
+function updateFileInputAndList() {
+  const dt = new DataTransfer();
+  selectedFiles.forEach(f => dt.items.add(f));
+  fileInput.files = dt.files;
+  renderFileList();
+  uploadText.textContent = selectedFiles.length
+    ? `${selectedFiles.length} archivo(s) seleccionado(s)`
+    : 'Arrastra archivos aquí';
+}
+function renderFileList() {
+  fileList.innerHTML = '';
+  selectedFiles.forEach((file, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<i class="fa-solid fa-file"></i><span class="file-name-text">${file.name}</span><span class="remove-file" data-index="${i}"><i class="fa-solid fa-xmark"></i></span>`;
+    fileList.appendChild(li);
+  });
+  fileList.querySelectorAll('.remove-file').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      selectedFiles.splice(+btn.dataset.index, 1);
+      updateFileInputAndList();
+    });
+  });
+}
+</script>

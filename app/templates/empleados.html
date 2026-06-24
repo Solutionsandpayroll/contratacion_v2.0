@@ -1,0 +1,2171 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Empleados</title>
+
+    <!-- BOOTSTRAP -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- TOM SELECT -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+    <!-- FONT AWESOME -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- FUENTES -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;0,6..12,800;0,6..12,900;1,6..12,400&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+        --azul-oscuro:  #162b47;
+        --azul-medio:   #105788;
+        --rojo:         #e51148;
+        --gris:         #e0e5e5;
+        --blanco:       #ffffff;
+        --negro:        #000000;
+        --color-primary:       var(--azul-medio);
+        --color-primary-dark:  var(--azul-oscuro);
+        --color-accent:        var(--rojo);
+        --color-surface:       var(--blanco);
+        --color-bg:            #f0f3f6;
+        --color-border:        #d4dae2;
+        --azul-oscuro-5:   rgba(22, 43, 71, .05);
+        --azul-oscuro-10:  rgba(22, 43, 71, .10);
+        --azul-medio-10:   rgba(16, 87, 136, .10);
+        --azul-medio-15:   rgba(16, 87, 136, .15);
+        --rojo-10:         rgba(229, 17, 72, .10);
+        --rojo-20:         rgba(229, 17, 72, .20);
+        --text-primary:   var(--azul-oscuro);
+        --text-secondary: #4a5e74;
+        --text-muted:     #7a8fa3;
+        --text-on-dark:   var(--blanco);
+        --radius-xs:  4px;
+        --radius-sm:  6px;
+        --radius:    10px;
+        --radius-lg: 14px;
+        --radius-xl: 20px;
+        --shadow-xs: 0 1px 2px rgba(22,43,71,.06);
+        --shadow-sm: 0 2px 6px rgba(22,43,71,.08), 0 1px 2px rgba(22,43,71,.04);
+        --shadow:    0 4px 16px rgba(22,43,71,.10), 0 2px 4px rgba(22,43,71,.06);
+        --shadow-lg: 0 16px 40px rgba(22,43,71,.16), 0 6px 16px rgba(22,43,71,.08);
+        --sidebar-w: 256px;
+        --btn-h:     38px;
+        --btn-px:    16px;
+        --btn-fs:    .8rem;
+        --btn-fw:    800;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Nunito Sans', system-ui, sans-serif;
+            background: var(--color-bg);
+            background-image:
+                radial-gradient(ellipse 80% 50% at 70% -10%, rgba(16,87,136,.08) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 30% at 5% 100%,  rgba(22,43,71,.05)  0%, transparent 55%);
+            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text-primary);
+            display: flex;
+        }
+
+        i[class*="fa-"] {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            height: 100vh;
+            position: fixed;
+            top: 0; left: 0;
+            background: var(--azul-oscuro);
+            display: flex;
+            flex-direction: column;
+            z-index: 200;
+            border-right: 1px solid rgba(16,87,136,.25);
+            box-shadow: 4px 0 20px rgba(22,43,71,.22);
+            overflow: hidden;
+        }
+
+        /* Orbe ambient pulsante */
+        .sidebar::after {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 160px; height: 160px;
+            border-radius: 50%;
+            background: rgba(16,87,136,.15);
+            pointer-events: none;
+            animation: sb-orb 5s ease-in-out infinite;
+        }
+        @keyframes sb-orb {
+            0%, 100% { transform: scale(1); opacity: .5; }
+            50%       { transform: scale(1.2); opacity: .9; }
+        }
+
+        /* Logo */
+        .sidebar-logo {
+            padding: 18px 16px 16px;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 72px;
+            position: relative;
+        }
+        .sidebar-logo::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 16px; right: 16px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(16,87,136,.7), transparent);
+        }
+        .sidebar-logo-img {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            max-height: 120px;
+            object-fit: contain;
+            display: block;
+            filter: brightness(0) invert(1);
+            opacity: .9;
+            transition: opacity .2s;
+        }
+        .sidebar-logo-img:hover { opacity: 1; }
+
+        /* Nav */
+        .sidebar-nav {
+            flex: 1;
+            padding: 14px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            overflow-y: auto;
+        }
+        .sidebar-section-label {
+            font-size: .58rem;
+            font-weight: 900;
+            color: rgba(255,255,255,.18);
+            text-transform: uppercase;
+            letter-spacing: 1.8px;
+            padding: 14px 12px 6px;
+        }
+
+        /* Links — animación de entrada */
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            font-size: .83rem;
+            font-weight: 700;
+            color: rgba(255,255,255,.48);
+            text-decoration: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateX(-16px);
+            animation: sb-link-in .38s ease forwards;
+            transition:
+                color .22s ease,
+                background .22s ease,
+                border-color .22s ease,
+                transform .22s cubic-bezier(.34,1.56,.64,1);
+        }
+        /* Stagger de entrada */
+        .sidebar-link:nth-child(1) { animation-delay: .05s; }
+        .sidebar-link:nth-child(2) { animation-delay: .12s; }
+        .sidebar-link:nth-child(3) { animation-delay: .19s; }
+        .sidebar-link:nth-child(4) { animation-delay: .26s; }
+        .sidebar-link:nth-child(5) { animation-delay: .33s; }
+        @keyframes sb-link-in {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Shimmer hover */
+        .sidebar-link::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,.05);
+            transform: translateX(-110%);
+            transition: transform .32s cubic-bezier(.4,0,.2,1);
+            border-radius: var(--radius-sm);
+        }
+        .sidebar-link:hover::before { transform: translateX(0); }
+
+        .sidebar-link:hover {
+            color: rgba(255,255,255,.9);
+            transform: translateX(5px);
+        }
+
+        /* Active */
+        .sidebar-link.active {
+            background: linear-gradient(95deg, rgba(16,87,136,.72) 0%, rgba(16,87,136,.38) 100%);
+            color: var(--blanco);
+            border: 1px solid rgba(16,87,136,.35);
+            transform: none;
+        }
+        .sidebar-link.active::before { display: none; }
+
+        /* Accent bar rojo — animado */
+        .sidebar-link.active::after {
+            content: '';
+            position: absolute;
+            left: 0; top: 20%; bottom: 20%;
+            width: 3px;
+            background: var(--rojo);
+            border-radius: 0 3px 3px 0;
+            animation: sb-accent .35s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        @keyframes sb-accent {
+            from { transform: scaleY(0); opacity: 0; }
+            to   { transform: scaleY(1); opacity: 1; }
+        }
+
+        /* Ícono */
+        .sidebar-link-icon {
+            width: 20px; height: 20px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            font-size: .9rem;
+            opacity: .7;
+            transition: opacity .2s, transform .22s cubic-bezier(.34,1.56,.64,1);
+        }
+        .sidebar-link:hover .sidebar-link-icon   { opacity: 1; transform: scale(1.14); }
+        .sidebar-link.active .sidebar-link-icon  { opacity: 1; }
+
+        /* Ripple al hacer clic */
+        .sb-ripple {
+            position: absolute;
+            border-radius: 50%;
+            width: 6px; height: 6px;
+            background: rgba(255,255,255,.3);
+            transform: scale(0);
+            pointer-events: none;
+            animation: sb-ripple .5s ease-out forwards;
+        }
+        @keyframes sb-ripple {
+            to { transform: scale(32); opacity: 0; }
+        }
+
+        /* ── Bloque de cierre de sesión ── */
+        .sidebar-logout {
+            padding: 6px 10px 4px;
+            border-top: 1px solid rgba(255,255,255,.06);
+            margin-top: auto;
+        }
+
+        /* Footer */
+        .sidebar-footer {
+            padding: 14px 16px;
+            border-top: 1px solid rgba(255,255,255,.06);
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            flex-shrink: 0;
+        }
+        .sidebar-footer-avatar {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: rgba(16,87,136,.5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 900; color: var(--blanco);
+            flex-shrink: 0;
+            border: 1.5px solid rgba(16,87,136,.55);
+        }
+        .sidebar-footer-info { flex: 1; min-width: 0; }
+        .sidebar-footer-name {
+            font-size: .72rem; font-weight: 800;
+            color: rgba(255,255,255,.5);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .sidebar-version {
+            font-size: .62rem; font-weight: 700;
+            color: rgba(255,255,255,.18);
+            letter-spacing: .4px;
+        }
+
+        .main-content { margin-left: var(--sidebar-w); flex: 1; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
+
+        .topbar {
+            background: var(--blanco); border-bottom: 1px solid var(--color-border);
+            padding: 0 28px; position: sticky; top: 0; z-index: 100;
+            box-shadow: var(--shadow-xs); flex-shrink: 0;
+        }
+        .topbar-inner { max-width: 1440px; margin: 0 auto; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+        .breadcrumb-trail { display: flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 700; color: var(--text-muted); }
+        .breadcrumb-trail i { font-size: .75rem; opacity: .6; }
+        .breadcrumb-trail .current { color: var(--azul-oscuro); font-weight: 800; }
+        .topbar-user { display: flex; align-items: center; gap: 10px; }
+        .user-badge { width: 32px; height: 32px; background: var(--azul-oscuro); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--blanco); font-size: .72rem; font-weight: 900; letter-spacing: .3px; }
+        .user-label { font-size: .78rem; font-weight: 700; color: var(--text-secondary); }
+
+        .main { max-width: 1440px; margin: 0 auto; padding: 26px 24px 64px; width: 100%; flex: 1; }
+
+        .alert { padding: 12px 16px; border-radius: var(--radius); font-size: .85rem; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; animation: fadeSlideDown .3s ease; }
+        .alert-success { background: #e6f9ee; color: #0d5228; border: 1px solid #a3e4bb; }
+        .alert-error   { background: var(--rojo-10); color: #7a0020; border: 1px solid var(--rojo-20); }
+        .messages { margin-bottom: 18px; }
+
+        @keyframes fadeSlideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+        .toolbar-title { font-family: 'Calibri', 'Nunito Sans', sans-serif; font-size: 1.35rem; font-weight: 700; color: var(--azul-oscuro); display: flex; align-items: center; gap: 9px; letter-spacing: -.2px; }
+        .toolbar-title-icon { width: 32px; height: 32px; background: var(--azul-medio-10); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: .95rem; color: var(--azul-medio); }
+        .toolbar-count { display: inline-flex; align-items: center; background: var(--azul-medio); color: var(--blanco); font-size: .68rem; font-weight: 800; padding: 2px 9px; border-radius: 999px; letter-spacing: .3px; margin-left: 2px; }
+
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: var(--btn-h); padding: 0 var(--btn-px); border: none; border-radius: var(--radius-sm); font-family: 'Nunito Sans', sans-serif; font-size: var(--btn-fs); font-weight: var(--btn-fw); cursor: pointer; text-decoration: none; white-space: nowrap; letter-spacing: .2px; position: relative; overflow: hidden; transition: background .2s ease, box-shadow .2s ease, transform .2s cubic-bezier(.34,1.56,.64,1); }
+        .btn::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0); transition: background .25s; pointer-events: none; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(22,43,71,.15); }
+        .btn:hover::after { background: rgba(255,255,255,.12); }
+        .btn:active { transform: translateY(0) scale(.97); }
+
+        .btn-primary   { background: var(--azul-medio); color: var(--blanco); }
+        .btn-primary:hover { background: var(--azul-oscuro); }
+        .btn-success   { background: var(--azul-oscuro); color: var(--blanco); }
+        .btn-success:hover { background: #0d1f35; }
+        .btn-danger    { background: var(--rojo); color: var(--blanco); }
+        .btn-danger:hover { background: #c20e3e; }
+        .btn-info      { background: var(--azul-medio); color: var(--blanco); }
+        .btn-info:hover { background: var(--azul-oscuro); }
+        .btn-warning   { background: #c9610a; color: var(--blanco); }
+        .btn-warning:hover { background: #a34e07; box-shadow: 0 6px 18px rgba(201,97,10,.35); transform: translateY(-2px); }
+        .btn-secondary { background: var(--gris); color: var(--text-secondary); }
+        .btn-secondary:hover { background: #ccd4d4; }
+        .btn-teal      { background: var(--azul-medio); color: var(--blanco); }
+        .btn-teal:hover { background: var(--azul-oscuro); color: var(--blanco); }
+
+        .btn-action, .btn-action-danger {
+            background: var(--azul-medio); color: var(--blanco); border: none;
+            height: 34px; padding: 0 14px; font-size: 0.75rem; font-weight: 800;
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 6px; border-radius: var(--radius-sm); transition: all 0.25s ease;
+            white-space: nowrap; line-height: 1;
+        }
+        .btn-action-danger { background: var(--rojo); }
+        .btn-action:hover, .btn-action-danger:hover { filter: brightness(1.08); box-shadow: 0 6px 18px rgba(22,43,71,.2); transform: translateY(-2px); }
+        .btn-action:active, .btn-action-danger:active { filter: brightness(0.98); transform: translateY(0); box-shadow: 0 2px 6px rgba(22,43,71,.15); }
+        .btn-action i, .btn-action-danger i { font-size: 0.8rem; flex-shrink: 0; }
+        .btn-action-row { display: flex; gap: 0.5rem; justify-content: center; }
+        .btn-action-row > .btn-action, .btn-action-row > .btn-action-danger { flex: 1 1 0; min-width: 0; }
+
+        .btn-outline-primary { background: transparent; color: var(--azul-medio); border: 1.5px solid var(--azul-medio); }
+        .btn-outline-primary:hover { background: var(--azul-medio); color: var(--blanco); }
+        .btn-ghost { background: var(--blanco); border: 1.5px solid var(--color-border); color: var(--text-secondary); }
+        .btn-ghost:hover { background: var(--gris); border-color: #b8c2cc; }
+        .btn i { font-size: .85rem; flex-shrink: 0; }
+
+        .btn-spinner {
+            display: none;
+            width: 14px; height: 14px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin .75s linear infinite;
+            flex-shrink: 0;
+        }
+        .btn.loading .btn-spinner { display: inline-flex; }
+        .btn.loading .btn-label   { opacity: 0.6; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .card { background: var(--blanco); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 24px; animation: fadeSlideDown .35s ease; }
+
+        .table-outer { background: var(--blanco); border: 1px solid var(--color-border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; max-height: 58vh; }
+        .table-scroll { overflow-x: auto; overflow-y: auto; flex: 1; }
+        table { width: 100%; border-collapse: collapse; font-size: .77rem; white-space: nowrap; min-width: 1800px; }
+        thead { background: #f5f7fa; border-bottom: 2px solid var(--color-border); position: sticky; top: 0; z-index: 2; }
+        th { padding: 11px 10px; text-align: center; font-size: .62rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: .7px; background: #f5f7fa; }
+        th:nth-child(2) { text-align: left; }
+        td { padding: 9px 10px; border-bottom: 1px solid #eef1f5; color: var(--text-secondary); text-align: center; vertical-align: middle; }
+        td:nth-child(2) { text-align: left; font-weight: 700; color: var(--azul-oscuro); }
+        tbody tr { opacity: 0; animation: rowIn .45s ease forwards; transition: background .15s; }
+        @keyframes rowIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        tbody tr:hover td { background: #f0f5fb; }
+        .table-scroll th:last-child, .table-scroll td:last-child { position: sticky; right: 0; background: var(--blanco); z-index: 3; border-left: 1px solid var(--color-border); box-shadow: -3px 0 10px rgba(22,43,71,.05); }
+        .table-scroll th:last-child { background: #f5f7fa; z-index: 4; }
+        .table-scroll tbody tr:hover td:last-child { background: #f0f5fb; }
+
+        .badge { padding: 3px 10px; border-radius: 999px; font-weight: 800; font-size: .67rem; text-transform: uppercase; letter-spacing: .4px; transition: transform .15s; }
+        .badge:hover { transform: scale(1.05); }
+        .badge.bg-primary { background: var(--azul-medio) !important; }
+
+        .modal.fade .modal-content { animation: modalIn .35s cubic-bezier(.34,1.4,.64,1); }
+        @keyframes modalIn { from { opacity: 0; transform: translateY(-24px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .modal-content { border-radius: var(--radius-lg); border: none; box-shadow: var(--shadow-lg); overflow: hidden; }
+        .modal-header { border-bottom: none; padding: 18px 22px; }
+        .modal-header .modal-title { font-family: 'Calibri', 'Nunito Sans', sans-serif; font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 9px; }
+        .modal-header.bg-primary { background: var(--azul-medio) !important; color: var(--blanco) !important; }
+        .modal-header.bg-warning { background: #c9610a !important; color: var(--blanco) !important; }
+        .modal-header.bg-info    { background: var(--azul-medio) !important; color: var(--blanco) !important; }
+        .modal-header.bg-success { background: var(--azul-oscuro) !important; color: var(--blanco) !important; }
+        .modal-body   { padding: 22px; }
+        .modal-footer { border-top: 1px solid var(--color-border); padding: 14px 22px; }
+        .modal-footer .btn { min-width: 96px; }
+
+        .modern-form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; margin-top: 1rem; }
+        @media (max-width: 992px) { .modern-form-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .modern-form-grid { grid-template-columns: 1fr; } }
+
+        .field-group { display: flex; flex-direction: column; position: relative; min-width: 0; }
+        .field-group .d-flex.gap-2.align-items-start > .flex-grow-1 { min-width: 0; flex: 1 1 0%; }
+        .field-group .d-flex .ts-wrapper { flex: 1 1 0 !important; min-width: 0 !important; }
+        .field-group .d-flex { align-items: center !important; }
+        .field-group .d-flex .ts-wrapper.single .ts-control { height: 42px !important; min-height: 42px !important; box-sizing: border-box; flex: 1 1 0; min-width: 0; }
+
+        .field-label { display: flex; align-items: center; gap: 0.4rem; font-size: 0.73rem; font-weight: 800; color: var(--azul-oscuro); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 0.3rem; transition: color 0.2s; }
+        .field-label i { font-size: 0.75rem; color: var(--azul-medio); opacity: 0.75; transition: opacity 0.2s, transform 0.2s; width: 14px; text-align: center; }
+        .field-group:focus-within .field-label i { opacity: 1; transform: scale(1.1); }
+
+        .modern-form-grid input:not([type="radio"]):not([type="checkbox"]):not([type="file"]),
+        .modal-body input:not([type="radio"]):not([type="checkbox"]):not([type="file"]),
+        .modern-input { min-width: 0 !important; max-width: 100% !important; white-space: nowrap !important; overflow-x: auto !important; overflow-y: hidden !important; text-overflow: ellipsis !important; scrollbar-width: none !important; }
+        .modern-form-grid input:not([type="radio"]):not([type="checkbox"]):not([type="file"])::-webkit-scrollbar,
+        .modal-body input:not([type="radio"]):not([type="checkbox"]):not([type="file"])::-webkit-scrollbar,
+        .modern-input::-webkit-scrollbar { display: none !important; }
+
+        .modern-form-grid input:not([type="radio"]):not([type="checkbox"]):not([type="file"]),
+        .modern-form-grid select, .modern-form-grid textarea,
+        .modal-body input:not([type="radio"]):not([type="checkbox"]):not([type="file"]),
+        .modal-body select, .modal-body textarea,
+        .modern-input, .modern-select {
+            width: 100%; height: 42px; padding: 0 14px;
+            background: #f9fbfd; border: 1.5px solid #e0e5ea; border-radius: 8px;
+            font-family: 'Nunito Sans', sans-serif; font-weight: 600; font-size: 0.82rem;
+            color: var(--azul-oscuro); outline: none; box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, transform 0.15s ease;
+        }
+        .modern-form-grid select, .modern-body select, .modern-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23162b47'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 14px center; padding-right: 2.4rem; cursor: pointer;
+        }
+        .modern-form-grid input:focus, .modern-form-grid select:focus, .modern-form-grid textarea:focus,
+        .modern-body input:focus, .modern-body select:focus, .modern-body textarea:focus,
+        .modern-input:focus, .modern-select:focus {
+            background: #ffffff; border-color: var(--azul-medio);
+            box-shadow: 0 0 0 4px rgba(16,87,136,0.08), 0 4px 12px rgba(22,43,71,0.06); transform: translateY(-1px);
+        }
+        .modern-form-grid input::placeholder, .modern-body input::placeholder, .modern-input::placeholder { color: #a0b3c5; font-weight: 500; opacity: 1; }
+        .modern-form-grid input:hover, .modern-form-grid select:hover, .modern-form-grid textarea:hover,
+        .modern-body input:hover, .modern-body select:hover, .modern-body textarea:hover,
+        .modern-input:hover, .modern-select:hover { border-color: #cbd5e0; }
+        .modern-form-grid input:disabled, .modern-form-grid select:disabled, .modern-form-grid textarea:disabled,
+        .modern-body input:disabled, .modern-body select:disabled, .modern-body textarea:disabled,
+        .modern-input:disabled, .modern-select:disabled { background: #f1f4f8; color: #8b9aab; cursor: not-allowed; }
+        .modern-form-grid textarea, .modern-body textarea, textarea.modern-input { height: auto; min-height: 80px; resize: vertical; padding: 10px 14px; }
+
+        .field-group.has-error input, .field-group.has-error select, .field-group.has-error textarea,
+        .field-group.has-error .modern-input, .field-group.has-error .modern-select { border-color: var(--rojo); box-shadow: 0 0 0 3px var(--rojo-10); animation: shake 0.3s ease; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+        .field-error { font-size: 0.7rem; font-weight: 700; color: var(--rojo); margin-top: 0.2rem; display: flex; align-items: center; gap: 4px; }
+        .field-error i { font-size: 0.7rem; color: var(--rojo); }
+
+        .form-section-title { grid-column: 1 / -1; background: var(--azul-oscuro); color: var(--blanco); padding: 0.6rem 1rem; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 800; letter-spacing: 0.3px; margin: 0.5rem 0 0.25rem; display: flex; align-items: center; gap: 0.5rem; }
+        .form-section-title i { font-size: 0.85rem; color: var(--blanco); opacity: 0.9; }
+
+        .btn-quick-add { width: 42px; height: 42px; background: #ffffff; border: 1.5px dashed #cbd5e0; border-radius: 8px; color: var(--azul-medio); display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 800; cursor: pointer; transition: all 0.2s ease; flex-shrink: 0; }
+        .btn-quick-add:hover { border-color: var(--azul-medio); background: rgba(16,87,136,0.06); box-shadow: 0 2px 8px rgba(16,87,136,0.1); transform: scale(1.04); }
+
+        .info-user { background: linear-gradient(135deg, #f6f8fb 0%, #eef1f5 100%); border-radius: var(--radius); padding: 1rem 1.2rem; border: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; box-shadow: var(--shadow-xs); }
+        .info-user h5 { font-family: 'Calibri', 'Nunito Sans', sans-serif; font-weight: 700; color: var(--azul-oscuro); font-size: 1rem; margin: 0; display: flex; align-items: center; gap: 0.4rem; }
+        .info-user h5 i { font-size: .95rem; color: var(--azul-medio); }
+        .info-user p { font-size: 0.8rem; margin: 0.15rem 0; color: var(--text-secondary); }
+
+        .form-errors-banner { border-left: 4px solid var(--rojo); background: var(--rojo-10); padding: 0.75rem 1rem; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.82rem; color: #7a0020; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+        .form-errors-banner i { font-size: 1rem; color: var(--rojo); flex-shrink: 0; }
+
+        .drop-zone { border: 2px dashed var(--color-border); border-radius: var(--radius); padding: 32px 20px; text-align: center; cursor: pointer; transition: all .22s ease; background: #f8fafb; color: var(--text-muted); font-weight: 600; font-size: .88rem; position: relative; }
+        .drop-zone:hover { border-color: var(--azul-medio); background: var(--azul-medio-10); transform: scale(1.015); }
+        .drop-zone.dragover { border-color: var(--azul-medio); background: var(--azul-medio-10); transform: scale(1.02); }
+        .drop-zone i.drop-icon { font-size: 2.4rem; color: var(--text-muted); margin-bottom: 10px; display: block; opacity: .65; }
+
+        .file-name-wrapper { display: inline-flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+        .file-name-display { font-size: .82rem; color: var(--azul-medio); font-weight: 700; background: var(--blanco); padding: 7px 14px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); word-break: break-all; }
+        .clear-file-btn { display: none; width: 26px; height: 26px; border: none; border-radius: 50%; background: var(--rojo); color: #fff; cursor: pointer; box-shadow: 0 2px 8px rgba(229,17,72,.35); align-items: center; justify-content: center; padding: 0; transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; flex-shrink: 0; }
+        .clear-file-btn.visible { display: inline-flex; }
+        .clear-file-btn:hover { background: #c20e3e; transform: scale(1.12); box-shadow: 0 4px 14px rgba(229,17,72,.45); }
+        .clear-file-btn i { font-size: 0.65rem; color: #fff; pointer-events: none; }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(22,43,71,.48); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 1055; }
+        .modal-overlay.active { display: flex; }
+        .modal-box { background: var(--blanco); border-radius: var(--radius-lg); width: 92%; max-width: 860px; max-height: 92vh; overflow-y: auto; box-shadow: var(--shadow-lg); animation: modalIn .35s cubic-bezier(.34,1.4,.64,1); }
+        .modal-overlay.active .modal-box { animation: modalIn .35s cubic-bezier(.34,1.4,.64,1); }
+
+        .modal-header-teal { background: linear-gradient(95deg, var(--azul-oscuro) 0%, var(--azul-medio) 100%); color: var(--blanco); padding: 18px 20px; border-radius: var(--radius-lg) var(--radius-lg) 0 0; display: flex; justify-content: space-between; align-items: flex-start; }
+        .modal-header-content h2 { font-family: 'Calibri', 'Nunito Sans', sans-serif; font-size: 1.15rem; font-weight: 700; margin: 0; }
+        .modal-header-content p { font-size: .8rem; opacity: .8; margin: 3px 0 0; }
+        .btn-close-modal { background: rgba(255,255,255,.12); border: none; color: var(--blanco); cursor: pointer; width: 28px; height: 28px; border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: center; transition: background .15s; font-size: .85rem; }
+        .btn-close-modal:hover { background: rgba(255,255,255,.22); }
+
+        .emp-strip { display: flex; background: #f6f8fb; border-radius: var(--radius); padding: 12px; margin-bottom: 18px; border: 1px solid var(--color-border); gap: 8px; }
+        .emp-strip-item { flex: 1; text-align: center; }
+        .emp-strip-label { display: block; font-size: .62rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: .6px; font-weight: 700; margin-bottom: 3px; }
+        .emp-strip-value { font-weight: 800; color: var(--azul-oscuro); font-size: .85rem; }
+
+        .modal-section { margin-bottom: 22px; }
+        .modal-section-title { font-size: .78rem; font-weight: 800; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .5px; }
+        .modal-section-title::before { content: ''; display: inline-block; width: 3px; height: 14px; background: var(--azul-medio); border-radius: 2px; }
+
+        .chip-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .chip { display: flex; align-items: center; gap: 6px; border: 1.5px solid var(--color-border); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-size: .82rem; font-weight: 700; color: var(--text-secondary); user-select: none; transition: all .18s ease; }
+        .chip input[type="radio"] { display: none; }
+        .chip:hover { border-color: var(--azul-medio); background: var(--azul-medio-10); color: var(--azul-medio); }
+        .chip.selected { background: var(--azul-medio); border-color: var(--azul-medio); color: var(--blanco); }
+        .chip-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; opacity: .5; }
+        .chip.selected .chip-dot { opacity: 1; }
+
+        .modal-field { margin-top: 10px; }
+        .modal-field label { display: block; font-size: .75rem; font-weight: 700; color: var(--text-secondary); margin-bottom: 4px; }
+        .modal-input { width: 100%; padding: 8px 11px; border: 1.5px solid var(--color-border); border-radius: var(--radius-sm); font-family: 'Nunito Sans', sans-serif; font-size: .85rem; font-weight: 600; color: var(--azul-oscuro); transition: border-color .15s, box-shadow .15s; }
+        .modal-input:focus { outline: none; border-color: var(--azul-medio); box-shadow: 0 0 0 3px var(--azul-medio-10); }
+
+        .hw-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; table-layout: fixed; font-size: .72rem; min-width: unset; }
+        .hw-table th, .hw-table td { border: 1px solid var(--color-border); padding: 2px 5px; font-size: .72rem; vertical-align: middle; }
+        .hw-table th { background: #f5f7fa; font-weight: 800; color: var(--text-secondary); font-size: .61rem; text-transform: uppercase; letter-spacing: .5px; padding: 4px 5px; }
+        .hw-table td:first-child  { width: 58%; }
+        .hw-table td:nth-child(2) { width: 32%; }
+        .hw-table td:last-child   { width: 10%; text-align: center; }
+        .hw-table input { width: 100%; border: none; padding: 1px 3px; border-radius: var(--radius-xs); font-family: 'Nunito Sans', sans-serif; font-weight: 600; background: transparent; font-size: .72rem; line-height: 1.2; height: 20px; }
+        .hw-table input:focus { outline: none; background: var(--azul-medio-10); border-radius: var(--radius-xs); }
+        .modal-section:has(#hw-tbody) { overflow-x: hidden; }
+
+        .btn-add-hw { background: none; border: 1.5px dashed var(--color-border); border-radius: var(--radius-sm); padding: 4px 10px; color: var(--text-muted); font-size: .76rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all .18s; }
+        .btn-add-hw:hover { border-color: var(--azul-medio); color: var(--azul-medio); background: var(--azul-medio-10); }
+        .btn-add-hw i { font-size: .75rem; }
+
+        .btn-rm-hw { background: none; border: none; color: var(--rojo); cursor: pointer; padding: 0; transition: transform .15s; font-size: .85rem; line-height: 1; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; }
+        .btn-rm-hw:hover { transform: scale(1.2); }
+
+        .quick-error { font-size: .74rem; font-weight: 700; }
+
+        /* ── TOM SELECT ── */
+        .ts-wrapper .ts-dropdown { border: 1px solid #d4dae2 !important; border-radius: 10px !important; box-shadow: 0 12px 32px rgba(22,43,71,.12), 0 4px 8px rgba(22,43,71,.06) !important; margin-top: 6px !important; overflow: hidden !important; background: #ffffff !important; z-index: 9999 !important; }
+        .ts-wrapper .ts-dropdown .option { padding: 10px 14px !important; font-size: 0.82rem !important; font-weight: 600 !important; color: var(--azul-oscuro) !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; border-bottom: 1px solid #f0f3f6 !important; }
+        .ts-wrapper .ts-dropdown .option:last-child { border-bottom: none !important; }
+        .ts-wrapper .ts-dropdown .option:hover,
+        .ts-wrapper .ts-dropdown .option.active {
+            background: var(--azul-medio) !important;
+            color: #ffffff !important;
+        }
+        .ts-wrapper .ts-dropdown .option.selected { background: var(--azul-medio) !important; color: #ffffff !important; font-weight: 700 !important; }
+        .ts-wrapper .ts-dropdown .search { padding: 8px !important; border-bottom: 1px solid #f0f3f6 !important; }
+        .ts-wrapper .ts-dropdown .search input { border: 1.5px solid #e0e5ea !important; border-radius: 6px !important; padding: 7px 12px !important; font-family: 'Nunito Sans', sans-serif !important; font-weight: 600 !important; font-size: 0.8rem !important; width: 100% !important; outline: none !important; position: static !important; opacity: 1 !important; height: auto !important; pointer-events: auto !important; }
+        .ts-wrapper .ts-dropdown .search input:focus { border-color: var(--azul-medio) !important; box-shadow: 0 0 0 3px rgba(16,87,136,.08) !important; }
+        .ts-wrapper .ts-dropdown .no-results { padding: 12px !important; color: var(--text-muted) !important; font-weight: 600 !important; text-align: center !important; }
+
+        .btn-cancel, .btn-register {
+            border: none; border-radius: 8px; padding: 0 20px; height: 40px;
+            font-weight: 700; font-size: 0.82rem;
+            display: inline-flex; align-items: center; gap: 8px;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.25,0.8,0.25,1.2);
+            position: relative; overflow: hidden;
+        }
+        .btn-cancel  { background: #a0aab5; color: #fff; }
+        .btn-register { background: var(--azul-medio); color: white; }
+        .btn-cancel::after, .btn-register::after { content: ""; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: rgba(255,255,255,0.18); transition: left 0.32s ease; }
+        .btn-cancel:hover  { background: #b7c0ca; color: #fff; box-shadow: 0 4px 14px rgba(22,43,71,.18); transform: translateY(-2px); }
+        .btn-register:hover { background: var(--azul-oscuro); box-shadow: 0 6px 18px rgba(22,43,71,.25); transform: translateY(-2px); }
+        .btn-cancel i, .btn-register i { font-size: 0.8rem; }
+
+        .modal-header-gradient { background: linear-gradient(135deg, var(--azul-oscuro) 0%, var(--azul-medio) 100%); color: var(--blanco); padding: 1.2rem 1.5rem; border-bottom: none; display: flex; align-items: center; justify-content: space-between; }
+        .modal-header-gradient .modal-title { font-family: 'Calibri', 'Nunito Sans', sans-serif; font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .modal-header-gradient .modal-title i { font-size: 1rem; }
+        .modal-header-gradient .btn-close-custom { background: rgba(255,255,255,0.15); border: none; color: var(--blanco); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: .8rem; transition: background 0.2s, transform 0.2s; }
+        .modal-header-gradient .btn-close-custom:hover { background: rgba(255,255,255,0.25); transform: rotate(90deg); }
+
+        .centered-icon-modal .modal-content { border-radius: 24px; box-shadow: 0 32px 64px rgba(22,43,71,.22), 0 8px 24px rgba(22,43,71,.10); overflow: hidden; border: none; }
+        .centered-icon-modal .modal-body { text-align: center; padding: 2.8rem 2.4rem 1.6rem; position: relative; }
+        .centered-icon-modal .modal-body::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; border-radius: 24px 24px 0 0; }
+        .centered-icon-modal.modal-success .modal-body::before { background: linear-gradient(90deg, #198754, #2cb97d); }
+        .centered-icon-modal.modal-danger  .modal-body::before { background: linear-gradient(90deg, var(--rojo), #ff5c8a); }
+        .centered-icon-modal.modal-warning .modal-body::before { background: linear-gradient(90deg, #f97316, #facc15); }
+        .centered-icon-modal.modal-confirm .modal-body::before { background: linear-gradient(90deg, var(--azul-medio), var(--azul-oscuro)); }
+        .centered-icon-modal .modal-icon-wrap { width: 72px; height: 72px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 1rem; position: relative; }
+        .centered-icon-modal.modal-success .modal-icon-wrap { background: #e6f9ee; }
+        .centered-icon-modal.modal-danger  .modal-icon-wrap { background: var(--rojo-10); }
+        .centered-icon-modal.modal-warning .modal-icon-wrap { background: rgba(249,115,22,.10); }
+        .centered-icon-modal.modal-confirm .modal-icon-wrap { background: var(--azul-medio-10); }
+        .centered-icon-modal .modal-icon { font-size: 3rem; display: block; line-height: 1; }
+        .centered-icon-modal .modal-title-text { font-family: 'Calibri', 'Nunito Sans', sans-serif; font-weight: 700; font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--azul-oscuro); }
+        .centered-icon-modal .modal-body p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0; line-height: 1.6; }
+        .centered-icon-modal .modal-footer { justify-content: center; border-top: none; padding: 0 2.4rem 2rem; gap: 1rem; background: #fafbfc; }
+        .centered-icon-modal .modal-footer .btn { min-width: 118px; height: 44px; font-size: 0.83rem; border-radius: 10px; }
+        .icon-danger  { color: var(--rojo); }
+        .icon-success { color: #198754; }
+        .icon-warning { color: #f97316; }
+        .icon-confirm { color: var(--azul-medio); }
+
+        /* Tom Select control */
+        .ts-wrapper.single .ts-control {
+            height: 42px !important; min-height: 42px !important; max-height: 42px !important;
+            flex-wrap: nowrap !important; overflow: hidden !important;
+            display: flex !important; align-items: center !important;
+            background: #f9fbfd !important; border: 1.5px solid #e0e5ea !important;
+            border-radius: 8px !important; padding: 0 36px 0 14px !important;
+            font-family: 'Nunito Sans', sans-serif !important; font-weight: 600 !important; font-size: 0.82rem !important;
+            color: var(--azul-oscuro) !important; box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+            cursor: pointer !important; position: relative !important;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23162b47'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important; background-position: right 14px center !important;
+        }
+        .ts-wrapper.single.focus .ts-control,
+        .ts-wrapper.single .ts-control:focus-within { background: #ffffff !important; border-color: var(--azul-medio) !important; box-shadow: 0 0 0 4px rgba(16,87,136,.08), 0 4px 12px rgba(22,43,71,.06) !important; transform: translateY(-1px) !important; }
+        .ts-wrapper.single .ts-control:hover { border-color: #cbd5e0 !important; }
+        .ts-wrapper .ts-control input { position: static !important; opacity: 1 !important; width: auto !important; height: auto !important; pointer-events: auto !important; font-family: 'Nunito Sans', sans-serif !important; font-weight: 600 !important; font-size: 0.82rem !important; color: var(--azul-oscuro) !important; }
+
+        /* FIX 1: ocultar placeholder al escribir */
+        .ts-wrapper .ts-control .placeholder { color: #a0b3c5 !important; font-weight: 500 !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+        .ts-wrapper.single.input-active .ts-control .placeholder { display: none !important; }
+
+        .ts-wrapper.single .ts-control::after { display: none !important; }
+        .ts-wrapper.open .ts-control::after { border-color: transparent transparent var(--azul-medio) transparent !important; }
+
+        #modalCrear .field-group .d-flex { align-items: center; }
+        #modalCrear .field-group .ts-wrapper.single .ts-control { height: 42px !important; min-height: 42px !important; }
+
+        .ts-wrapper.single .ts-control .item { flex: 1 1 auto !important; min-width: 0 !important; max-width: 100% !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; display: block !important; line-height: 42px !important; }
+
+        .ts-wrapper.single .ts-control input { position: absolute !important; opacity: 0 !important; width: 1px !important; height: 1px !important; pointer-events: none !important; flex: 0 !important; }
+
+        /* DESPUÉS */
+        .ts-wrapper.single.input-active .ts-control .item { opacity: 0 !important; position: absolute !important; left: -9999px !important; pointer-events: none !important; }
+        .ts-wrapper.single.input-active .ts-control input { position: static !important; opacity: 1 !important; width: 100% !important; min-width: 2px !important; height: auto !important; pointer-events: auto !important; flex: 1 1 100% !important; font-family: 'Nunito Sans', sans-serif !important; font-weight: 600 !important; font-size: 0.82rem !important; color: var(--azul-oscuro) !important; background: transparent !important; border: none !important; outline: none !important; padding: 0 !important; }
+
+        #modalCrear .field-group .flex-grow-1 { min-width: 0; overflow: visible; }
+        #modalCrear .field-group .flex-grow-1 .ts-wrapper, .modal-body .field-group .flex-grow-1 .ts-wrapper { width: 100%; position: relative; }
+        #modalCrear .field-group .flex-grow-1 .ts-wrapper .ts-control, .modal-body .field-group .flex-grow-1 .ts-wrapper .ts-control { overflow: hidden; }
+        .ts-wrapper { min-width: 0 !important; max-width: 100% !important; width: 100% !important; }
+        .ts-wrapper.single .ts-control { overflow: hidden; }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 0; overflow: hidden; }
+            .main-content { margin-left: 0; }
+            .topbar { padding: 0 14px; }
+            .main { padding: 16px 12px 48px; }
+            .card { padding: 16px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .table-outer { max-height: 50vh; }
+            .centered-icon-modal .modal-body { padding: 1.8rem 1.5rem 1.2rem; }
+        }
+
+        /* ══════════════════════════════════════════
+        CORREO MODAL — sistema de diseño RRHH
+        ══════════════════════════════════════════ */
+
+        /* ── Contenedor base ── */
+        .correo-modal-content {
+        border-radius: 16px !important;
+        border: none !important;
+        overflow: hidden !important;
+        box-shadow: 0 24px 64px rgba(22,43,71,.22), 0 6px 20px rgba(22,43,71,.10) !important;
+        }
+
+        /* ── Header ── */
+        .correo-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 22px;
+        background: linear-gradient(100deg, var(--azul-oscuro) 0%, var(--azul-medio) 100%);
+        position: relative;
+        overflow: hidden;
+        }
+        .correo-header::after {
+        content: '';
+        position: absolute;
+        right: -30px; top: -30px;
+        width: 120px; height: 120px;
+        border-radius: 50%;
+        background: rgba(255,255,255,.06);
+        pointer-events: none;
+        }
+        .correo-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        }
+        .correo-header-icon {
+        width: 40px; height: 40px;
+        background: rgba(255,255,255,.15);
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff;
+        font-size: 1rem;
+        flex-shrink: 0;
+        backdrop-filter: blur(4px);
+        }
+        .correo-header-title {
+        font-family: 'Calibri', 'Nunito Sans', sans-serif;
+        font-weight: 700;
+        font-size: 1.05rem;
+        color: #fff;
+        line-height: 1.2;
+        }
+        .correo-header-sub {
+        font-size: .7rem;
+        color: rgba(255,255,255,.6);
+        font-weight: 600;
+        margin-top: 2px;
+        }
+        .correo-close-btn {
+        background: rgba(255,255,255,.12);
+        border: none;
+        color: #fff;
+        width: 30px; height: 30px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        font-size: .82rem;
+        transition: background .18s, transform .2s;
+        flex-shrink: 0;
+        }
+        .correo-close-btn:hover {
+        background: rgba(255,255,255,.24);
+        transform: rotate(90deg);
+        }
+
+        /* ── Destinatario strip ── */
+        .correo-recipient-strip {
+        display: flex;
+        align-items: stretch;
+        background: #f8fafc;
+        border-bottom: 1px solid #e8edf3;
+        padding: 0;
+        }
+        .correo-recipient-field {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 20px;
+        flex: 1;
+        min-width: 0;
+        }
+        .correo-recipient-field--email { flex: 1.4; }
+        .correo-recipient-label {
+        font-size: .68rem;
+        font-weight: 800;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: .6px;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        flex-shrink: 0;
+        }
+        .correo-recipient-label i { font-size: .7rem; color: var(--azul-medio); }
+        .correo-recipient-input {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+        height: auto !important;
+        font-family: 'Nunito Sans', sans-serif;
+        font-weight: 700;
+        font-size: .84rem;
+        color: var(--azul-oscuro);
+        outline: none !important;
+        box-shadow: none !important;
+        min-width: 0;
+        width: 100%;
+        cursor: default;
+        }
+        .correo-recipient-divider {
+        width: 1px;
+        background: #e0e5ec;
+        margin: 10px 0;
+        flex-shrink: 0;
+        }
+
+        /* ── Body: layout dos columnas ── */
+        .correo-body {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 0;
+        min-height: 400px;
+        }
+        @media (max-width: 900px) {
+        .correo-body { grid-template-columns: 1fr; }
+        }
+
+        /* ── Sidebar izquierda ── */
+        .correo-sidebar {
+        background: #f8fafc;
+        border-right: 1px solid #e8edf3;
+        padding: 20px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        }
+
+        /* ── Columna editor ── */
+        .correo-editor-col {
+        padding: 20px 20px 16px;
+        display: flex;
+        flex-direction: column;
+        }
+
+        /* ── Field group ── */
+        .correo-field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        }
+        .correo-field-group--grow {
+        flex: 1;
+        }
+
+        /* ── Labels ── */
+        .correo-label {
+        font-size: .68rem;
+        font-weight: 800;
+        color: var(--azul-oscuro);
+        text-transform: uppercase;
+        letter-spacing: .5px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        }
+        .correo-label i {
+        font-size: .7rem;
+        color: var(--azul-medio);
+        opacity: .8;
+        width: 12px;
+        text-align: center;
+        }
+
+        /* ── Inputs & selects ── */
+        .correo-input,
+        .correo-select {
+        width: 100%;
+        height: 38px;
+        padding: 0 12px;
+        background: #fff;
+        border: 1.5px solid #dde3ec;
+        border-radius: 8px;
+        font-family: 'Nunito Sans', sans-serif;
+        font-weight: 600;
+        font-size: .8rem;
+        color: var(--azul-oscuro);
+        outline: none;
+        transition: border-color .18s, box-shadow .18s, background .18s;
+        box-shadow: 0 1px 3px rgba(22,43,71,.04);
+        }
+        .correo-input::placeholder { color: #a8bac8; font-weight: 500; }
+        .correo-input:focus,
+        .correo-select:focus {
+        border-color: var(--azul-medio);
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(16,87,136,.1);
+        }
+        .correo-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='%23162b47'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 32px;
+        cursor: pointer;
+        }
+
+        /* ── Drop zone adjuntos ── */
+        .correo-drop-zone {
+        border: 1.5px dashed #c8d4e0;
+        border-radius: 10px;
+        padding: 18px 12px 14px;
+        text-align: center;
+        cursor: pointer;
+        background: #fff;
+        transition: border-color .18s, background .18s, transform .18s;
+        }
+        .correo-drop-zone:hover,
+        .correo-drop-zone.dragover {
+        border-color: var(--azul-medio);
+        background: rgba(16,87,136,.04);
+        transform: scale(1.01);
+        }
+        .correo-drop-inner { pointer-events: none; }
+        .correo-drop-icon-wrap {
+        width: 36px; height: 36px;
+        background: rgba(16,87,136,.08);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 8px;
+        }
+        .correo-drop-icon-wrap i {
+        font-size: .95rem;
+        color: var(--azul-medio);
+        }
+        .correo-drop-text {
+        font-size: .75rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        margin: 0;
+        line-height: 1.5;
+        }
+        .correo-drop-text span {
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: .7rem;
+        }
+
+        /* ── File list ── */
+        .correo-file-list {
+        list-style: none;
+        margin: 8px 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        }
+        .correo-file-list li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #fff;
+        border: 1px solid #e0e8f0;
+        border-radius: 7px;
+        padding: 5px 10px;
+        font-size: .74rem;
+        font-weight: 700;
+        color: var(--azul-oscuro);
+        transition: background .15s, border-color .15s;
+        gap: 8px;
+        }
+        .correo-file-list li:hover {
+        background: rgba(16,87,136,.05);
+        border-color: var(--azul-medio);
+        }
+        .correo-file-list li i.fa-file {
+        color: var(--azul-medio);
+        font-size: .8rem;
+        flex-shrink: 0;
+        }
+        .correo-file-list li span.file-name-text {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        }
+        .remove-file {
+        cursor: pointer;
+        color: var(--rojo);
+        font-size: .8rem;
+        font-weight: 800;
+        width: 20px; height: 20px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 50%;
+        flex-shrink: 0;
+        transition: background .15s, color .15s;
+        }
+        .remove-file:hover {
+        background: var(--rojo-10);
+        color: #a31038;
+        }
+
+        /* ── Custom Editor ── */
+        .ce-editor-wrap {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        border: 1.5px solid #dde3ec;
+        border-radius: 10px;
+        overflow: hidden;
+        background: #fff;
+        transition: border-color .18s, box-shadow .18s;
+        }
+        .ce-editor-wrap:focus-within {
+        border-color: var(--azul-medio);
+        box-shadow: 0 0 0 3px rgba(16,87,136,.08);
+        }
+        .ce-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        flex-wrap: wrap;
+        padding: 6px 10px;
+        background: #f5f7fa;
+        border-bottom: 1px solid #e4eaf2;
+        }
+        .ce-toolbar-group {
+        display: flex;
+        align-items: center;
+        gap: 1px;
+        }
+        .ce-toolbar-sep {
+        width: 1px;
+        height: 18px;
+        background: #dde3ec;
+        margin: 0 4px;
+        flex-shrink: 0;
+        }
+        .ce-btn {
+        width: 28px;
+        height: 28px;
+        border: none;
+        background: transparent;
+        border-radius: 5px;
+        color: var(--text-secondary);
+        font-size: .76rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background .15s, color .15s;
+        padding: 0;
+        flex-shrink: 0;
+        }
+        .ce-btn:hover {
+        background: rgba(16,87,136,.1);
+        color: var(--azul-medio);
+        }
+        .ce-btn.active {
+        background: var(--azul-medio);
+        color: #fff;
+        }
+        .ce-editable {
+        flex: 1;
+        min-height: 280px;
+        padding: 14px 16px;
+        font-family: 'Nunito Sans', sans-serif;
+        font-size: .86rem;
+        color: var(--azul-oscuro);
+        line-height: 1.65;
+        outline: none;
+        overflow-y: auto;
+        background: #fff;
+        }
+        .ce-editable:empty::before {
+        content: attr(data-placeholder);
+        color: #a8bac8;
+        pointer-events: none;
+        }
+        .ce-editable ul, .ce-editable ol {
+        padding-left: 1.5rem;
+        }
+        .ce-editable p { margin: 0 0 .5em; }
+
+        /* ── Footer ── */
+        .correo-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 22px;
+        background: #f8fafc;
+        border-top: 1px solid #e8edf3;
+        gap: 12px;
+        flex-wrap: wrap;
+        }
+        .correo-footer-meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: .7rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        }
+        .correo-footer-meta i {
+        font-size: .75rem;
+        color: #8da4b8;
+        }
+        .correo-footer-actions {
+        display: flex;
+        gap: 8px;
+        }
+
+        /* ── Botones footer ── */
+        .correo-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        height: 38px;
+        padding: 0 18px;
+        border: none;
+        border-radius: 8px;
+        font-family: 'Nunito Sans', sans-serif;
+        font-size: .79rem;
+        font-weight: 800;
+        cursor: pointer;
+        letter-spacing: .2px;
+        transition: background .18s, box-shadow .18s, transform .18s;
+        white-space: nowrap;
+        }
+        .correo-btn i { font-size: .8rem; flex-shrink: 0; }
+
+        .correo-btn--cancel {
+        background: #e8edf4;
+        color: var(--text-secondary);
+        }
+        .correo-btn--cancel:hover {
+        background: #d8dfe8;
+        color: var(--azul-oscuro);
+        }
+
+        .correo-btn--send {
+        background: var(--azul-medio);
+        color: #fff;
+        box-shadow: 0 3px 10px rgba(16,87,136,.25);
+        }
+        .correo-btn--send:hover {
+        background: var(--azul-oscuro);
+        box-shadow: 0 6px 18px rgba(16,87,136,.35);
+        transform: translateY(-1px);
+        }
+        .correo-btn--send:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(16,87,136,.2);
+        }
+
+        /* ── Spinner en botón ── */
+        .correo-btn--send.sending {
+        pointer-events: none;
+        opacity: .88;
+        background: var(--azul-oscuro) !important;
+        transform: none !important;
+        box-shadow: 0 3px 10px rgba(22,43,71,.25) !important;
+        }
+        .correo-spin-ring {
+        display: inline-block;
+        width: 14px; height: 14px;
+        border: 2px solid rgba(255,255,255,.35);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: correo-spin .7s linear infinite;
+        flex-shrink: 0;
+        }
+        @keyframes correo-spin { to { transform: rotate(360deg); } }
+
+        /* ── Overlay enviando ── */
+        .correo-sending-overlay-active {
+        display: flex !important;
+        }
+        .correo-sending-box {
+        background: #fff;
+        border-radius: 20px;
+        padding: 2.4rem 2.8rem 2rem;
+        text-align: center;
+        box-shadow: 0 32px 64px rgba(22,43,71,.22), 0 8px 24px rgba(22,43,71,.12);
+        animation: correo-box-in .3s cubic-bezier(.34,1.4,.64,1);
+        min-width: 260px;
+        }
+        @keyframes correo-box-in {
+        from { opacity:0; transform: scale(.88) translateY(16px); }
+        to   { opacity:1; transform: scale(1)  translateY(0); }
+        }
+        .correo-sending-ring-wrap {
+        width: 72px; height: 72px;
+        margin: 0 auto 1.2rem;
+        position: relative;
+        display: flex; align-items: center; justify-content: center;
+        }
+        .correo-ring-svg {
+        position: absolute;
+        inset: 0; width: 100%; height: 100%;
+        animation: correo-ring-rot 1.4s linear infinite;
+        }
+        @keyframes correo-ring-rot { to { transform: rotate(360deg); } }
+        .correo-ring-track {
+        stroke: rgba(16,87,136,.12);
+        }
+        .correo-ring-arc {
+        stroke: var(--azul-medio);
+        stroke-linecap: round;
+        stroke-dasharray: 60 80;
+        }
+        .correo-sending-icon {
+        font-size: 1.6rem;
+        color: var(--azul-medio);
+        position: relative;
+        z-index: 1;
+        animation: correo-icon-pulse 1.4s ease-in-out infinite;
+        }
+        @keyframes correo-icon-pulse {
+        0%, 100% { opacity: 1;  transform: scale(1); }
+        50%       { opacity: .7; transform: scale(.9); }
+        }
+        .correo-sending-title {
+        font-family: 'Calibri', 'Nunito Sans', sans-serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--azul-oscuro);
+        margin-bottom: .3rem;
+        }
+        .correo-sending-sub {
+        font-size: .76rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <img src="{% static 'img/logo_biocore_blanco.png' %}" alt="Logo empresa" class="sidebar-logo-img">
+    </div>
+    <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Navegación</div>
+
+        <a href="{% url 'panel_admin' %}" class="sidebar-link">
+            <span class="sidebar-link-icon"><i class="fa-solid fa-gauge-high"></i></span>
+            Panel
+        </a>
+        
+        <a href="{% url 'empleados' %}" class="sidebar-link active">
+            <span class="sidebar-link-icon"><i class="fa-solid fa-users"></i></span>
+            Empleados
+        </a>
+        <a href="{% url 'generar_ficha_empleados' %}" class="sidebar-link">
+            <span class="sidebar-link-icon"><i class="fa-solid fa-file-lines"></i></span>
+            Ficha de Ingresos
+        </a>
+        <a href="{% url 'beneficios_empleados' %}" class="sidebar-link">
+            <span class="sidebar-link-icon"><i class="fa-solid fa-gift"></i></span>
+            Beneficios
+        </a>
+    </nav>
+
+    <!-- Cierre de sesión justo encima del footer -->
+    <div class="sidebar-logout">
+        <a href="{% url 'cerrar_sesion' %}" class="sidebar-link" style="animation: none; opacity: 1; transform: none;">
+            <span class="sidebar-link-icon"><i class="fa-solid fa-sign-out-alt"></i></span>
+            Cerrar Sesión
+        </a>
+    </div>
+
+    <div class="sidebar-footer">
+        <div class="sidebar-footer-avatar">AD</div>
+        <div class="sidebar-footer-info">
+            <div class="sidebar-footer-name">Administrador</div>
+            <div class="sidebar-version">v2.0 · Sistema RRHH</div>
+        </div>
+    </div>
+</aside>
+
+<div class="main-content">
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="breadcrumb-trail">
+                <i class="fa-solid fa-house"></i> Panel
+                <i class="fa-solid fa-chevron-right"></i>
+                <span class="current">Gestión de Empleados</span>
+            </div>
+            <div class="topbar-user">
+                <div class="user-badge">AD</div>
+                <span class="user-label">Bienvenido</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="toolbar">
+            <div class="toolbar-title">
+                <div class="toolbar-title-icon"><i class="fa-solid fa-users"></i></div>
+                Gestión de Empleados
+                <span class="toolbar-count" id="count-label">{{ empleados|length }}</span>
+            </div>
+            <div style="flex:1"></div>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalCargarExcel">
+                <i class="fa-solid fa-file-excel"></i> Cargar Excel
+            </button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalCrear">
+                <i class="fa-solid fa-plus"></i> Registrar nuevo usuario
+            </button>
+        </div>
+
+        <div class="table-outer">
+            <div class="table-scroll">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Tipo Doc.</th><th>Documento</th><th>Primer Nombre</th>
+                            <th>Segundo Nombre</th><th>Primer Apellido</th><th>Segundo Apellido</th>
+                            <th>Correo</th><th>Celular</th><th>Estado</th><th>Ciudad Res.</th>
+                            <th>Cargo</th><th>Código Emp.</th><th>Compañía</th><th>Fecha Ingreso</th>
+                            <th>Sueldo</th><th style="min-width:195px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for empleado in empleados %}
+                            <tr>
+                                <td>{{ empleado.tipo_doc|default:"-" }}</td>
+                                <td>{{ empleado.documento|default:"-" }}</td>
+                                <td>{{ empleado.nombre_1|default:"-" }}</td>
+                                <td>{{ empleado.nombre_2|default:"-" }}</td>
+                                <td>{{ empleado.primer_apellido|default:"-" }}</td>
+                                <td>{{ empleado.segundo_apellido|default:"-" }}</td>
+                                <td>{{ empleado.email|default:"-" }}</td>
+                                <td>{{ empleado.celular|default:"-" }}</td>
+                                <td><span class="badge bg-primary">{{ empleado.estado|default:"-" }}</span></td>
+                                <td>{{ empleado.ciudad_residencia|default:"-" }}</td>
+                                <td>{{ empleado.cargo|default:"-" }}</td>
+                                <td>{{ empleado.codigo_empleado|default:"-" }}</td>
+                                <td>{{ empleado.compania|default:"-" }}</td>
+                                <td>{{ empleado.f_ingreso|date:"d/m/Y"|default:"-" }}</td>
+                                <td>$ {{ empleado.sueldo|floatformat:0|default:"-" }}</td>
+                                <td>
+                                    <div class="d-flex flex-column gap-2">
+                                        <div class="btn-action-row">
+                                            <button class="btn btn-action" data-bs-toggle="modal" data-bs-target="#modalCompletar{{ empleado.id_empleado }}" title="Completar información">
+                                                <i class="fa-solid fa-circle-check"></i> Completar
+                                            </button>
+                                            <button class="btn btn-action-danger" data-bs-toggle="modal" data-bs-target="#modalEliminar{{ empleado.id_empleado }}" title="Eliminar">
+                                                <i class="fa-solid fa-trash"></i> Eliminar
+                                            </button>
+                                        </div>
+                                        <div class="btn-action-row">
+                                            <button type="button" class="btn btn-action"
+                                                    onclick="abrirModalCorreo('{{ empleado.id_empleado|escapejs }}',
+                                                                            '{{ empleado.nombre_1|default:""|escapejs }} {{ empleado.primer_apellido|default:""|escapejs }}',
+                                                                            '{{ empleado.email|default:""|escapejs }}')"
+                                                    title="Enviar correo">
+                                                <i class="fa-solid fa-envelope"></i> Correo
+                                            </button>
+                                            <button type="button" class="btn btn-action" onclick="abrirModalDocs('{{ empleado.id_empleado|escapejs }}','{{ empleado.nombre_1|default:""|escapejs }} {{ empleado.primer_apellido|default:""|escapejs }}','{{ empleado.tipo_doc|default:""|escapejs }}','{{ empleado.documento|default:""|escapejs }}')" title="Generar documentos">
+                                                <i class="fa-solid fa-file-arrow-down"></i> Docs
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!-- MODAL COMPLETAR -->
+                            <div class="modal fade" id="modalCompletar{{ empleado.id_empleado }}" tabindex="-1">
+                                <div class="modal-dialog modal-xl modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <form method="POST" onsubmit="return validarFormularioCompletar(this)">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="accion" value="completar">
+                                            <input type="hidden" name="id_empleado" value="{{ empleado.id_empleado }}">
+                                            <div class="modal-header-gradient">
+                                                <h5 class="modal-title"><i class="fa-solid fa-circle-check"></i> Completar Información</h5>
+                                                <button type="button" class="btn-close-custom" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                {% if form_completo.errors %}
+                                                    <div class="form-errors-banner"><i class="fa-solid fa-triangle-exclamation"></i> Revisa los campos marcados en rojo.</div>
+                                                {% endif %}
+                                                <div class="info-user mb-4">
+                                                    <div>
+                                                        <h5><i class="fa-solid fa-user"></i> {{ empleado.nombre_1 }} {{ empleado.nombre_2 }} {{ empleado.primer_apellido }} {{ empleado.segundo_apellido }}</h5>
+                                                        <p><strong>Tipo Documento:</strong> {{ empleado.tipo_doc }} | <strong>Documento:</strong> {{ empleado.documento }}</p>
+                                                        <p><strong>Correo:</strong> {{ empleado.email }} | <strong>Celular:</strong> {{ empleado.celular }}</p>
+                                                    </div>
+                                                    <button type="button" class="btn btn-action" onclick="const mc=this.closest('.modal');mc.dataset.skipCleanup='true';bootstrap.Modal.getInstance(mc).hide();bootstrap.Modal.getOrCreateInstance(document.getElementById('modalEditar{{ empleado.id_empleado }}')).show();">
+                                                        <i class="fa-solid fa-pen"></i> Modificar
+                                                    </button>
+                                                </div>
+                                                <div class="modern-form-grid">
+                                                    {% for field in empleado.form_completo %}
+                                                        <div class="field-group{% if field.errors %} has-error{% endif %}">
+                                                            <label class="field-label">
+                                                                {% if 'fecha' in field.name or 'nacimiento' in field.name %}<i class="fa-regular fa-calendar"></i>
+                                                                {% elif 'nombre' in field.name %}<i class="fa-solid fa-user"></i>
+                                                                {% elif 'email' in field.name or 'correo' in field.name %}<i class="fa-solid fa-envelope"></i>
+                                                                {% elif 'telefono' in field.name or 'celular' in field.name %}<i class="fa-solid fa-phone"></i>
+                                                                {% elif 'ciudad' in field.name or 'lugar' in field.name %}<i class="fa-solid fa-location-dot"></i>
+                                                                {% elif 'sueldo' in field.name or 'salario' in field.name %}<i class="fa-solid fa-dollar-sign"></i>
+                                                                {% else %}<i class="fa-solid fa-circle-dot"></i>{% endif %}
+                                                                {{ field.label }}
+                                                            </label>
+                                                            {% if field.name == 'ciudad_residencia' or field.name == 'lugar_nacimiento' %}
+                                                                <div class="d-flex gap-2 align-items-start">
+                                                                    <div class="flex-grow-1">{{ field }}</div>
+                                                                    <button type="button" class="btn-quick-add" onclick="App.quickAdd.abrir('ciudad','{{ field.name }}',this)"><i class="fa-solid fa-plus"></i></button>
+                                                                </div>
+                                                            {% elif field.name == 'centro_costos' %}
+                                                                <div class="d-flex gap-2 align-items-start">
+                                                                    <div class="flex-grow-1">{{ field }}</div>
+                                                                    <button type="button" class="btn-quick-add" onclick="App.quickAdd.abrir('centro_costo','centro_costos',this)"><i class="fa-solid fa-plus"></i></button>
+                                                                </div>
+                                                            {% elif field.name == 'subcliente' %}
+                                                                <div class="d-flex gap-2 align-items-start">
+                                                                    <div class="flex-grow-1">{{ field }}</div>
+                                                                    <button type="button" class="btn-quick-add" onclick="App.quickAdd.abrir('subcliente','subcliente',this)"><i class="fa-solid fa-plus"></i></button>
+                                                                </div>
+                                                            {% else %}{{ field }}{% endif %}
+                                                            {% if field.errors %}<div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ field.errors|striptags }}</div>{% endif %}
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn-cancel" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+                                                <button type="submit" class="btn-register"><i class="fa-solid fa-check"></i> Guardar</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- MODAL EDITAR -->
+                            <div class="modal fade" id="modalEditar{{ empleado.id_empleado }}" tabindex="-1">
+                                <div class="modal-dialog modal-lg modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <form method="POST" class="form-editar" data-empleado="{{ empleado.id_empleado }}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="accion" value="editar_basico">
+                                            <input type="hidden" name="id_empleado" value="{{ empleado.id_empleado }}">
+                                            <div class="modal-header-gradient">
+                                                <h5 class="modal-title"><i class="fa-solid fa-pen-to-square"></i> Modificar Datos</h5>
+                                                <button type="button" class="btn-close-custom" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="modern-form-grid">
+                                                    <div class="field-group"><label class="field-label"><i class="fa-solid fa-user"></i> Primer Nombre</label><input type="text" name="nombre_1" value="{{ empleado.nombre_1 }}" class="modern-input"></div>
+                                                    <div class="field-group"><label class="field-label"><i class="fa-solid fa-user"></i> Segundo Nombre</label><input type="text" name="nombre_2" value="{{ empleado.nombre_2 }}" class="modern-input"></div>
+                                                    <div class="field-group"><label class="field-label"><i class="fa-solid fa-user"></i> Primer Apellido</label><input type="text" name="primer_apellido" value="{{ empleado.primer_apellido }}" class="modern-input"></div>
+                                                    <div class="field-group"><label class="field-label"><i class="fa-solid fa-user"></i> Segundo Apellido</label><input type="text" name="segundo_apellido" value="{{ empleado.segundo_apellido }}" class="modern-input"></div>
+                                                    <div class="field-group">
+                                                        <label class="field-label"><i class="fa-solid fa-chevron-down"></i> Tipo Documento</label>
+                                                        <select name="tipo_doc" class="modern-select">{% for value, label in form_basico.fields.tipo_doc.choices %}<option value="{{ value }}" {% if empleado.tipo_doc == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+                                                    </div>
+                                                    <div class="field-group"><label class="field-label"><i class="fa-solid fa-id-card"></i> Documento</label><input type="text" name="documento" value="{{ empleado.documento }}" class="modern-input"></div>
+                                                    <div class="field-group"><label class="field-label"><i class="fa-solid fa-phone"></i> Celular</label><input type="text" name="celular" value="{{ empleado.celular }}" class="modern-input"></div>
+                                                    <div class="field-group" style="grid-column:span 2;"><label class="field-label"><i class="fa-solid fa-envelope"></i> Correo</label><input type="email" name="email" value="{{ empleado.email }}" class="modern-input"></div>
+                                                    <div class="field-group">
+                                                        <label class="field-label"><i class="fa-solid fa-circle-dot"></i> Estado</label>
+                                                        <select name="estado" class="modern-select">{% for value, label in form_basico.fields.estado.choices %}<option value="{{ value }}" {% if empleado.estado == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn-cancel" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+                                                <button type="submit" class="btn-register"><i class="fa-solid fa-check"></i> Guardar</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- MODAL ELIMINAR -->
+                            <div class="modal fade centered-icon-modal modal-danger" id="modalEliminar{{ empleado.id_empleado }}" tabindex="-1">
+                                <div class="modal-dialog modal-dialog-centered modal-md">
+                                    <div class="modal-content">
+                                        <form method="POST">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="accion" value="eliminar">
+                                            <input type="hidden" name="id_empleado" value="{{ empleado.id_empleado }}">
+                                            <div class="modal-body">
+                                                <div class="modal-icon-wrap"><i class="fa-solid fa-trash modal-icon icon-danger"></i></div>
+                                                <div class="modal-title-text">Confirmar eliminación</div>
+                                                <p>¿Estás seguro de eliminar a <strong>{{ empleado.nombre_1 }} {{ empleado.primer_apellido }}</strong>?</p>
+                                                <p class="text-muted small">Esta acción no se puede deshacer.</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancelar</button>
+                                                <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- MODAL CARGAR EXCEL -->
+<div class="modal fade" id="modalCargarExcel" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" enctype="multipart/form-data" id="formCargarExcel">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="cargar_excel">
+                <div class="modal-header-gradient">
+                    <h5 class="modal-title"><i class="fa-solid fa-file-excel"></i> Cargar empleados desde Excel</h5>
+                    <button type="button" class="btn-close-custom" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="drop-zone" id="dropZoneExcel">
+                        <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                        <p>Arrastra y suelta tu archivo aquí<br><small>o haz clic para seleccionar</small></p>
+                        <div class="file-name-wrapper">
+                            <span class="file-name-display" id="fileDisplay">Ningún archivo seleccionado</span>
+                            <button type="button" class="clear-file-btn" id="clearFileBtn" onclick="event.stopPropagation();clearFileInput();" title="Quitar archivo"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <input type="file" name="archivo_excel" id="fileInputExcel" accept=".xlsx,.xls" required style="display:none;">
+                    </div>
+                    <small class="text-muted d-block mt-2">Columnas requeridas: B (Nombre completo), C (Email), F (Compañía), H (Teléfono), X (Fecha inicio), Y (Fecha fin), Z (Salario mensual).</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+                    <button type="submit" class="btn-register"><i class="fa-solid fa-check"></i> Cargar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CREAR -->
+<div class="modal fade" id="modalCrear" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form method="POST" novalidate>
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="crear">
+                <div class="modal-header-gradient">
+                    <h5 class="modal-title"><i class="fa-solid fa-user-plus"></i> Registrar nuevo usuario</h5>
+                    <button type="button" class="btn-close-custom" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="modal-body">
+                    <div class="modern-form-grid">
+                        <div class="field-group">
+                            <label class="field-label"><i class="fa-solid fa-list"></i> Tipo Documento</label>
+                            {{ form_basico.tipo_doc }}
+                            {% if form_basico.tipo_doc.errors %}<div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_basico.tipo_doc.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label"><i class="fa-solid fa-id-card"></i> Documento</label>
+                            {{ form_basico.documento }}
+                            {% if form_basico.documento.errors %}<div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_basico.documento.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label"><i class="fa-solid fa-user"></i> Primer Nombre</label>
+                            {{ form_basico.nombre_1 }}
+                            {% if form_basico.nombre_1.errors %}<div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_basico.nombre_1.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label"><i class="fa-solid fa-users"></i> Segundo Nombre</label>
+                            {{ form_basico.nombre_2 }}
+                            {% if form_basico.nombre_2.errors %}<div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_basico.nombre_2.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label"><i class="fa-solid fa-user-tag"></i> Primer Apellido</label>
+                            {{ form_basico.primer_apellido }}
+                            {% if form_basico.primer_apellido.errors %}<div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_basico.primer_apellido.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label"><i class="fa-solid fa-bars"></i> Segundo Apellido</label>
+                            {{ form_basico.segundo_apellido }}
+                            {% if form_basico.segundo_apellido.errors %}<div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_basico.segundo_apellido.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label"><i class="fa-solid fa-location-dot"></i> Ciudad de Residencia</label>
+                            <div class="d-flex gap-2 align-items-start">
+                                <div class="flex-grow-1">{{ form_basico.ciudad_residencia }}</div>
+                                <button type="button" class="btn-quick-add" onclick="App.quickAdd.abrir('ciudad','ciudad_residencia',this)"><i class="fa-solid fa-plus"></i></button>
+                            </div>
+                            {% if form_basico.ciudad_residencia.errors %}<div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_basico.ciudad_residencia.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label"><i class="fa-solid fa-venus-mars"></i> Sexo</label>
+                            {{ form_basico.sexo }}
+                            {% if form_basico.sexo.errors %}<div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_basico.sexo.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label"><i class="fa-solid fa-mobile-screen"></i> Celular</label>
+                            {{ form_basico.celular }}
+                            {% if form_basico.celular.errors %}<div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_basico.celular.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label"><i class="fa-solid fa-envelope"></i> Correo Electrónico</label>
+                            {{ form_basico.email }}
+                            {% if form_basico.email.errors %}<div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_basico.email.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label"><i class="fa-solid fa-circle-check"></i> Estado</label>
+                            {{ form_basico.estado }}
+                            {% if form_basico.estado.errors %}<div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_basico.estado.errors|striptags }}</div>{% endif %}
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label"><i class="fa-solid fa-building"></i> Compañía</label>
+                            {{ form_basico.compania }}
+                            {% if form_basico.compania.errors %}<div class="field-error"><i class="fa-solid fa-circle-exclamation"></i> {{ form_basico.compania.errors|striptags }}</div>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+                    <button type="submit" class="btn-register"><i class="fa-solid fa-user-plus"></i> Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- QUICK ADD MODALES -->
+<div class="modal fade" id="modalQuickAddCiudad" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header-gradient">
+                <h5 class="modal-title"><i class="fa-solid fa-city"></i> Agregar nueva ciudad</h5>
+                <button type="button" class="btn-close-custom" onclick="App.quickAdd.cerrar('ciudad')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="formQuickAddCiudad">
+                    <div class="mb-3"><label class="form-label fw-bold">Código País</label><input type="text" name="codigo_pais" class="form-control" placeholder="Ej: 057"></div>
+                    <div class="mb-3"><label class="form-label fw-bold">Código Departamento</label><input type="text" name="codigo_departamento" class="form-control" placeholder="Ej: 18"></div>
+                    <div class="mb-3"><label class="form-label fw-bold">Código Ciudad</label><input type="text" name="codigo_dane" class="form-control" placeholder="Ej: 18785"></div>
+                    <div class="mb-3"><label class="form-label fw-bold">Nombre de la Ciudad</label><input type="text" name="nombre_ciudad" class="form-control" placeholder="Ej: SOLITA"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="App.quickAdd.cerrar('ciudad')"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+                <button type="button" class="btn-register btn-quick-save" onclick="App.quickAdd.guardar('ciudad')"><i class="fa-solid fa-check"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalQuickAddCentroCosto" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header-gradient">
+                <h5 class="modal-title"><i class="fa-solid fa-coins"></i> Agregar nuevo centro de costo</h5>
+                <button type="button" class="btn-close-custom" onclick="App.quickAdd.cerrar('centro_costo')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="formQuickAddCentroCosto">
+                    <div class="mb-3"><label class="form-label fw-bold">Código</label><input type="text" name="codigo" class="form-control" placeholder="Ej: CC01"></div>
+                    <div class="mb-3"><label class="form-label fw-bold">Nombre</label><input type="text" name="nombre" class="form-control" placeholder="Ej: Centro de costo 1"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="App.quickAdd.cerrar('centro_costo')"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+                <button type="button" class="btn-register btn-quick-save" onclick="App.quickAdd.guardar('centro_costo')"><i class="fa-solid fa-check"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalQuickAddSubcliente" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header-gradient">
+                <h5 class="modal-title"><i class="fa-solid fa-handshake"></i> Agregar nuevo subcliente</h5>
+                <button type="button" class="btn-close-custom" onclick="App.quickAdd.cerrar('subcliente')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="formQuickAddSubcliente">
+                    <div class="mb-3"><label class="form-label fw-bold">Código</label><input type="text" name="codigo" class="form-control" placeholder="Ej: SC01"></div>
+                    <div class="mb-3"><label class="form-label fw-bold">Nombre</label><input type="text" name="nombre" class="form-control" placeholder="Ej: Subcliente 1"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="App.quickAdd.cerrar('subcliente')"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+                <button type="button" class="btn-register btn-quick-save" onclick="App.quickAdd.guardar('subcliente')"><i class="fa-solid fa-check"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DOCS -->
+<div class="modal-overlay" id="modalDocsOverlay">
+    <div class="modal-box">
+        <div class="modal-header modal-header-teal">
+            <div class="modal-header-content">
+                <h2>Generar Documentación</h2>
+                <p>Completa las opciones y descarga el paquete.</p>
+            </div>
+            <div class="modal-header-actions">
+                <button class="btn-close-modal" onclick="cerrarModalDocs()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div class="emp-strip">
+                <div class="emp-strip-item"><span class="emp-strip-label">Empleado</span><span class="emp-strip-value" id="ms-nombre">—</span></div>
+                <div class="emp-strip-item"><span class="emp-strip-label">Tipo Doc</span><span class="emp-strip-value" id="ms-tipodoc">—</span></div>
+                <div class="emp-strip-item"><span class="emp-strip-label">Número Doc</span><span class="emp-strip-value" id="ms-documento">—</span></div>
+            </div>
+            <div class="modal-section">
+                <p class="modal-section-title">Tipo de Salario</p>
+                <div class="chip-group" id="grp-salario">
+                    <label class="chip selected" onclick="elegirChip('grp-salario',this)"><input type="radio" name="tipo_salario" value="ordinario" checked><span class="chip-dot"></span> Ordinario</label>
+                    <label class="chip" onclick="elegirChip('grp-salario',this)"><input type="radio" name="tipo_salario" value="integral"><span class="chip-dot"></span> Integral</label>
+                </div>
+            </div>
+            <div class="modal-section">
+                <p class="modal-section-title">Jornada de Trabajo</p>
+                <div class="chip-group" id="grp-jornada">
+                    <label class="chip selected" onclick="elegirChip('grp-jornada',this)"><input type="radio" name="jornada" value="tiempo_completo" checked><span class="chip-dot"></span> Tiempo Completo</label>
+                    <label class="chip" onclick="elegirChip('grp-jornada',this)"><input type="radio" name="jornada" value="medio_tiempo"><span class="chip-dot"></span> Medio Tiempo</label>
+                    <label class="chip" onclick="elegirChip('grp-jornada',this)"><input type="radio" name="jornada" value="otro"><span class="chip-dot"></span> Otro</label>
+                </div>
+                <div class="modal-field"><label>Horario</label><input class="modal-input" type="text" id="f-horario" value="8:00 am - 6:00 pm"></div>
+            </div>
+            <div class="modal-section">
+                <p class="modal-section-title">Lugar de Teletrabajo</p>
+                <div class="chip-group" id="grp-residencia">
+                    <label class="chip selected" onclick="elegirChip('grp-residencia',this);document.getElementById('f-otro-res-wrap').style.display='none'"><input type="radio" name="residencia" value="residencia" checked><span class="chip-dot"></span> Residencia</label>
+                    <label class="chip" onclick="elegirChip('grp-residencia',this);document.getElementById('f-otro-res-wrap').style.display='block'"><input type="radio" name="residencia" value="otro"><span class="chip-dot"></span> Otro</label>
+                </div>
+                <div id="f-otro-res-wrap" class="modal-field" style="display:none;"><label>Especificar</label><input class="modal-input" type="text" id="f-otro-res" placeholder="Ej: Finca, Apartamento…"></div>
+            </div>
+            <div class="modal-section">
+                <p class="modal-section-title">Fecha de Exámenes Médicos</p>
+                <div class="modal-field"><label>Fecha (opcional)</label><input class="modal-input" type="date" id="f-examenes"></div>
+            </div>
+            <div class="modal-section">
+                <p class="modal-section-title">Hardware / Software / Elementos</p>
+                <table class="hw-table"><thead><tr><th>Elemento</th><th>Referencia</th><th></th></tr></thead><tbody id="hw-tbody"></tbody></table>
+                <button type="button" class="btn-add-hw" onclick="agregarHW()"><i class="fa-solid fa-plus"></i> Agregar ítem</button>
+            </div>
+        </div>
+        <div class="modal-footer" style="justify-content: flex-end; gap: 12px;">
+            <button class="btn-cancel" onclick="cerrarModalDocs()">
+                <i class="fa-solid fa-xmark"></i> Cancelar
+            </button>
+            <button class="btn btn-teal" id="btn-generar" onclick="confirmarGenerar()">
+                <span class="btn-spinner"></span>
+                <span class="btn-label"><i class="fa-solid fa-download"></i> Generar y descargar</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- OVERLAY GENERANDO DOCUMENTOS -->
+<div id="docs-generating-overlay" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(22,43,71,.48); backdrop-filter:blur(3px); align-items:center; justify-content:center;">
+  <div class="correo-sending-box">
+    <div class="correo-sending-ring-wrap">
+      <svg class="correo-ring-svg" viewBox="0 0 56 56">
+        <circle class="correo-ring-track" cx="28" cy="28" r="22" fill="none" stroke-width="4"/>
+        <circle class="correo-ring-arc"   cx="28" cy="28" r="22" fill="none" stroke-width="4"/>
+      </svg>
+      <i class="fa-solid fa-file-arrow-down correo-sending-icon"></i>
+    </div>
+    <div class="correo-sending-title">Generando documentos…</div>
+    <div class="correo-sending-sub">Por favor espera un momento</div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRM -->
+<div class="modal fade centered-icon-modal modal-confirm" id="modalConfirm" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-icon-wrap"><i class="fa-solid fa-pen-to-square modal-icon icon-confirm"></i></div>
+                <div class="modal-title-text">Confirmar cambios</div>
+                <p id="confirmBody">¿Está seguro de guardar los cambios?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmOkBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SUCCESS -->
+<div class="modal fade centered-icon-modal modal-success" id="modalSuccess" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="modal-icon-wrap"><i class="fa-solid fa-circle-check modal-icon icon-success"></i></div>
+                <div class="modal-title-text">¡Éxito!</div>
+                <p id="successMessage"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include 'enviar_correo_modal.html' %}
+
+<!-- jQuery (obligatorio para Summernote) -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Tom Select -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<!-- Summernote JS -->
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-bs5.min.js"></script>
+
+<script>
+    const FIELD_DEFAULTS = {{ field_defaults_json|safe }};
+
+    const TS_CONFIG = {
+        create: false, maxItems: 1, diacritics: true, allowEmptyOption: true,
+        sortField: { field: 'text', direction: 'asc' },
+        placeholder: 'Selecciona o escribe...',
+        render: { no_results: () => '<div class="no-results">No se encontraron resultados</div>' },
+        onInitialize() { if (this.control_input) this.control_input.placeholder = ''; },
+        onDropdownOpen() { if (this.control_input) { this.control_input.value = ''; this.control_input.placeholder = 'Buscar...'; } },
+        onDropdownClose() { if (this.control_input) { this.control_input.value = ''; this.control_input.placeholder = ''; } },
+        onItemAdd() { if (this.control_input) { this.control_input.value = ''; this.control_input.blur(); } this.close(); },
+    };
+
+    const helpers = {
+        initTomSelect(container) {
+            container.querySelectorAll('.ciudad-select').forEach(sel => {
+                if (sel.dataset.tsInitializing === 'true') return;
+                const enModalCompletar = sel.closest('[id^="modalCompletar"]');
+                if (enModalCompletar && sel.tomselect) { sel.tomselect.destroy(); delete sel.dataset.tsReady; }
+                let tieneOpciones = false;
+                try { tieneOpciones = sel.options && sel.options.length > 0 && Array.from(sel.options).some(opt => opt.textContent.trim() !== ''); } catch (e) {}
+                if (!tieneOpciones) return;
+                sel.dataset.tsInitializing = 'true';
+                try {
+                    if (sel.tomselect) sel.tomselect.destroy();
+                    const hw = sel.nextElementSibling;
+                    if (hw && hw.classList.contains('ts-wrapper')) hw.remove();
+                    sel.style.display = '';
+                    const ts = new TomSelect(sel, TS_CONFIG);
+                    if (ts.wrapper) ts.wrapper.style.width = '100%';
+                } catch (e) { console.warn('TomSelect init error:', sel.name, e); }
+                finally { delete sel.dataset.tsInitializing; }
+            });
+        },
+
+        setupDateFormatting(container) {
+            container.querySelectorAll('.date-input').forEach(input => {
+                const enModalCompletar = input.closest('[id^="modalCompletar"]');
+                if (enModalCompletar) delete input.dataset.dateListener;
+                if (input.dataset.dateListener) return;
+                input.addEventListener('input', e => {
+                    let v = e.target.value.replace(/\D/g, '');
+                    if (v.length >= 2) v = v.slice(0,2) + '/' + v.slice(2);
+                    if (v.length >= 5) v = v.slice(0,5) + '/' + v.slice(5,9);
+                    e.target.value = v;
+                });
+                input.addEventListener('keypress', e => { if (!/[0-9]/.test(e.key) && !['Backspace','Delete','ArrowLeft','ArrowRight','Tab'].includes(e.key)) e.preventDefault(); });
+                input.removeAttribute('readonly'); input.style.cursor = 'text'; input.style.pointerEvents = 'auto';
+                input.dataset.dateListener = 'true';
+            });
+        },
+
+        limpiarModalCrear(modal) {
+            if (!modal) return;
+            modal.querySelectorAll('input:not([type="hidden"]), textarea').forEach(el => el.value = '');
+            modal.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; if (el.tomselect) el.tomselect.clear(true); });
+            Object.entries(FIELD_DEFAULTS).forEach(([name, value]) => {
+                modal.querySelectorAll(`[name="${name}"]`).forEach(el => {
+                    if (el.tagName === 'SELECT') { el.value = value; if (el.tomselect) el.tomselect.setValue(value, false); }
+                    else el.value = value;
+                });
+            });
+            modal.querySelectorAll('.text-danger, .form-errors-banner').forEach(el => el.remove());
+            modal.querySelectorAll('.has-error').forEach(el => el.classList.remove('has-error'));
+        },
+
+        getCookie(name) {
+            for (const c of document.cookie.split(';')) { const t = c.trim(); if (t.startsWith(name + '=')) return decodeURIComponent(t.slice(name.length + 1)); }
+            return null;
+        },
+    };
+
+    const formatoSueldo = {
+        formatear(valor) {
+            const solo = String(valor).replace(/\D/g, '');
+            if (!solo) return '';
+            return parseInt(solo, 10).toLocaleString('es-CO');
+        },
+        limpiar(valor) { return valor.replace(/\./g, '').replace(/,/g, ''); },
+        configurar(container) {
+            container.querySelectorAll('[name="sueldo"]').forEach(input => {
+                if (input.dataset.sueldoListener) return;
+                if (input.value) {
+                    const sinDecimal = String(input.value).replace(/\..*/, '');
+                    input.value = formatoSueldo.formatear(sinDecimal);
+                }
+                input.addEventListener('input', e => {
+                    const pos = e.target.selectionStart;
+                    const antes = e.target.value.length;
+                    e.target.value = formatoSueldo.formatear(e.target.value);
+                    const despues = e.target.value.length;
+                    e.target.selectionStart = e.target.selectionEnd = pos + (despues - antes);
+                    const modal = e.target.closest('.modal');
+                    if (modal) valorHora.actualizar(modal);
+                });
+                const form = input.closest('form');
+                if (form && !form.dataset.sueldoSubmitListener) {
+                    form.addEventListener('submit', () => { container.querySelectorAll('[name="sueldo"]').forEach(s => { s.value = formatoSueldo.limpiar(s.value); }); });
+                    form.dataset.sueldoSubmitListener = 'true';
+                }
+                input.dataset.sueldoListener = 'true';
+            });
+        },
+    };
+
+    const valorHora = {
+        actualizar(modal) {
+            if (!modal) return;
+            const s = modal.querySelector('[name="sueldo"]');
+            const h = modal.querySelector('[name="horas_mes"]');
+            const v = modal.querySelector('[name="valor_hora"]');
+            if (!s || !h || !v) return;
+            const sueldoLimpio = s.value.replace(/\./g, '').replace(/,/g, '');
+            const sueldo = parseFloat(sueldoLimpio) || 0;
+            const horas  = parseInt(h.value, 10) || 0;
+            v.value = (sueldo > 0 && horas > 0) ? (sueldo / horas).toFixed(2) : '';
+        },
+        configurar(modal) {
+            if (!modal) return;
+            const s = modal.querySelector('[name="sueldo"]');
+            if (s && !s.dataset.vhL) { s.addEventListener('input', () => valorHora.actualizar(modal)); s.dataset.vhL = 'true'; }
+            const h = modal.querySelector('[name="horas_mes"]');
+            if (h && !h.dataset.hL) { h.addEventListener('change', () => valorHora.actualizar(modal)); h.dataset.hL = 'true'; }
+            valorHora.actualizar(modal);
+        },
+    };
+
+    const modales = {
+        _inicializarCamposModal(modal) {
+            valorHora.configurar(modal);
+            helpers.setupDateFormatting(modal);
+            helpers.initTomSelect(modal);
+            formatoSueldo.configurar(modal);
+        },
+        init() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('shown.bs.modal', () => { modales._inicializarCamposModal(modal); });
+                modal.addEventListener('hidden.bs.modal', () => {
+                    if (modal.dataset.skipCleanup === 'true') { delete modal.dataset.skipCleanup; return; }
+                    if (modal.id === 'modalCrear') helpers.limpiarModalCrear(modal);
+                    if (modal.id.startsWith('modalEditar')) {
+                        const empId = modal.id.replace('modalEditar', '');
+                        const mc = document.getElementById('modalCompletar' + empId);
+                        if (mc) { mc.dataset.skipCleanup = 'true'; bootstrap.Modal.getOrCreateInstance(mc).show(); }
+                    }
+                });
+            });
+            document.querySelectorAll('[id^="modalCompletar"]').forEach(modal => {
+                modal.addEventListener('shown.bs.modal', () => { setTimeout(() => modales._inicializarCamposModal(modal), 80); });
+            });
+        },
+        reabrirConErrores() {
+            const idCompletar = "{{ modal_completar_abierto|default:''|escapejs }}";
+            if (idCompletar) { const el = document.getElementById(idCompletar); if (el) new bootstrap.Modal(el).show(); }
+            if ({{ modal_crear_abierto|yesno:"true,false" }}) { const el = document.getElementById('modalCrear'); if (el) new bootstrap.Modal(el).show(); }
+            const idEditar = "{{ modal_editar_abierto|default:''|escapejs }}";
+            if (idEditar) { const el = document.getElementById('modalEditar' + idEditar); if (el) new bootstrap.Modal(el).show(); }
+        },
+    };
+
+    let docState = { empleadoId: null, hwIdx: 0 };
+    const documentos = {
+        abrirModal(idEmpleado, nombre, tipoDoc, documento) {
+            docState.empleadoId = idEmpleado;
+            document.getElementById('ms-nombre').textContent    = nombre    || '—';
+            document.getElementById('ms-tipodoc').textContent   = tipoDoc   || '—';
+            document.getElementById('ms-documento').textContent = documento || '—';
+            document.getElementById('f-horario').value = '8:00 am - 6:00 pm';
+            document.getElementById('f-otro-res').value = '';
+            document.getElementById('f-examenes').value = '';
+            document.getElementById('f-otro-res-wrap').style.display = 'none';
+            document.getElementById('hw-tbody').innerHTML = '';
+            docState.hwIdx = 0;
+            const resetChips = (gid, def) => { document.querySelectorAll(`#${gid} .chip`).forEach(chip => { const r = chip.querySelector('input[type="radio"]'); chip.classList.remove('selected'); if (r) { r.checked = r.value === def; if (r.checked) chip.classList.add('selected'); } }); };
+            resetChips('grp-salario','ordinario'); resetChips('grp-jornada','tiempo_completo'); resetChips('grp-residencia','residencia');
+            documentos.agregarHW('PORTÁTIL', '');
+            const btn = document.getElementById('btn-generar'); if (btn) { btn.classList.remove('loading'); btn.disabled = false; }
+            document.getElementById('modalDocsOverlay').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        },
+        cerrarModal() {
+            document.getElementById('modalDocsOverlay').classList.remove('active');
+            document.body.style.overflow = '';
+            docState.empleadoId = null;
+            const btn = document.getElementById('btn-generar');
+            if (btn) { btn.classList.remove('loading'); btn.disabled = false; }
+        },
+        elegirChip(groupId, clickedLabel) {
+            document.querySelectorAll(`#${groupId} .chip`).forEach(c => c.classList.remove('selected'));
+            clickedLabel.classList.add('selected');
+            const r = clickedLabel.querySelector('input[type="radio"]'); if (r) r.checked = true;
+            if (groupId === 'grp-residencia') { const ow = document.getElementById('f-otro-res-wrap'); if (ow) ow.style.display = r?.value === 'otro' ? 'block' : 'none'; }
+        },
+        agregarHW(hwDefault = '', refDefault = '') {
+            const tbody = document.getElementById('hw-tbody'); if (!tbody) return;
+            const idx = docState.hwIdx++;
+            const tr = document.createElement('tr');
+            tr.id = `hw-r-${idx}`;
+            tr.innerHTML = `<td><input type="text" name="hw_${idx}" value="${hwDefault.replace(/"/g,'&quot;')}" placeholder="Ej: Laptop Dell XPS 15"></td><td><input type="text" name="ref_${idx}" value="${refDefault.replace(/"/g,'&quot;')}" placeholder="Ej: D-001"></td><td><button class="btn-rm-hw" type="button" onclick="documentos.quitarHW(${idx})"><i class="fa-solid fa-xmark"></i></button></td>`;
+            tbody.appendChild(tr);
+        },
+        quitarHW(idx) { document.getElementById(`hw-r-${idx}`)?.remove(); },
+        radioVal: name => document.querySelector(`input[name="${name}"]:checked`)?.value || '',
+        async generarYDescargar() {
+            if (!docState.empleadoId) return;
+
+            const overlay = document.getElementById('docs-generating-overlay');
+            if (overlay) overlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+
+            try {
+                const fd = new FormData();
+                fd.append('csrfmiddlewaretoken', helpers.getCookie('csrftoken'));
+                fd.append('tipo_salario', documentos.radioVal('tipo_salario'));
+                fd.append('jornada', documentos.radioVal('jornada'));
+                fd.append('horario_trabajo', document.getElementById('f-horario')?.value || '');
+                fd.append('residencia', documentos.radioVal('residencia'));
+                fd.append('otro_residencia_val', document.getElementById('f-otro-res')?.value || '');
+                fd.append('fecha_examenes', document.getElementById('f-examenes')?.value || '');
+                document.querySelectorAll('#hw-tbody input').forEach(inp => fd.append(inp.name, inp.value));
+
+                const resp = await fetch(`/empleados/${docState.empleadoId}/generar-documentos/`, { method: 'POST', body: fd });
+                if (!resp.ok) throw new Error((await resp.text()) || `Error ${resp.status}`);
+
+                const blob = await resp.blob();
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                const cd = resp.headers.get('Content-Disposition') || '';
+                const m = cd.match(/filename="?([^"]+)"?/);
+                a.download = m ? m[1] : `documentos_${docState.empleadoId}.zip`;
+                document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+
+            } catch (err) {
+                alert(`Error al generar documentos:\n${err.message}`);
+            } finally {
+                if (overlay) overlay.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        },
+    };
+
+    const quickAddConfig = {
+        ciudad:       { modalId: 'modalQuickAddCiudad',      formId: 'formQuickAddCiudad',      url: "{% url 'crear_ciudad_ajax' %}" },
+        centro_costo: { modalId: 'modalQuickAddCentroCosto', formId: 'formQuickAddCentroCosto', url: "{% url 'crear_centro_costo_ajax' %}" },
+        subcliente:   { modalId: 'modalQuickAddSubcliente',  formId: 'formQuickAddSubcliente',  url: "{% url 'crear_subcliente_ajax' %}" },
+    };
+    let qaState = { tipo: null, targetName: null, parentModalEl: null, parentModalInstance: null };
+    const quickAdd = {
+        abrir(tipo, targetName, btnEl) {
+            const cfg = quickAddConfig[tipo]; if (!cfg) return;
+            const parentModalEl = btnEl.closest('.modal');
+            qaState = { tipo, targetName, parentModalEl, parentModalInstance: null };
+            const form = document.getElementById(cfg.formId); if (form) form.reset();
+            quickAdd._limpiarErrores(cfg);
+            if (parentModalEl) { parentModalEl.dataset.skipCleanup = 'true'; qaState.parentModalInstance = bootstrap.Modal.getOrCreateInstance(parentModalEl); qaState.parentModalInstance.hide(); }
+            bootstrap.Modal.getOrCreateInstance(document.getElementById(cfg.modalId)).show();
+        },
+        cerrar(tipo) { const cfg = quickAddConfig[tipo]; if (!cfg) return; bootstrap.Modal.getInstance(document.getElementById(cfg.modalId))?.hide(); quickAdd._reabrirPadre(); },
+        _reabrirPadre() { if (qaState.parentModalInstance) qaState.parentModalInstance.show(); },
+        _limpiarErrores(cfg) { document.getElementById(cfg.modalId).querySelectorAll('.quick-error').forEach(el => el.remove()); },
+        _mostrarErrores(cfg, form, errores) {
+            quickAdd._limpiarErrores(cfg);
+            Object.entries(errores || {}).forEach(([campo, mensajes]) => {
+                const input = form.querySelector(`[name="${campo}"]`); if (!input) return;
+                const div = document.createElement('div'); div.className = 'text-danger small mt-1 quick-error'; div.textContent = (mensajes || []).map(m => m.message || m).join(', '); input.insertAdjacentElement('afterend', div);
+            });
+        },
+        _insertarOpcion(id, text) {
+            const { parentModalEl, targetName } = qaState; if (!parentModalEl || !targetName) return;
+            const select = parentModalEl.querySelector(`[name="${targetName}"]`); if (!select) return;
+            if (select.tomselect) { select.tomselect.addOption({ value: String(id), text }); select.tomselect.setValue(String(id)); }
+            else select.appendChild(new Option(text, String(id), true, true));
+        },
+        async guardar(tipo) {
+            const cfg = quickAddConfig[tipo]; if (!cfg) return;
+            const form = document.getElementById(cfg.formId); const modalEl = document.getElementById(cfg.modalId); const btn = modalEl.querySelector('.btn-quick-save');
+            const fd = new FormData(form); fd.append('csrfmiddlewaretoken', helpers.getCookie('csrftoken'));
+            if (btn) btn.disabled = true;
+            try { const resp = await fetch(cfg.url, { method: 'POST', body: fd }); const data = await resp.json(); if (!data.ok) { quickAdd._mostrarErrores(cfg, form, data.errors); return; } quickAdd._insertarOpcion(data.id, data.text); bootstrap.Modal.getInstance(modalEl)?.hide(); quickAdd._reabrirPadre(); }
+            catch (err) { alert('Error de conexión: ' + err.message); }
+            finally { if (btn) btn.disabled = false; }
+        },
+    };
+
+    const validaciones = {
+        formularioCompletar(form) {
+            for (const input of form.querySelectorAll('.date-input')) {
+                if (!input.value) continue;
+                if (!/^\d{2}\/\d{2}\/\d{4}$/.test(input.value)) { alert('El formato de fecha debe ser DD/MM/AAAA'); input.focus(); return false; }
+                const [d, m] = input.value.split('/').map(Number);
+                if (m < 1 || m > 12 || d < 1 || d > 31) { alert('La fecha ingresada no es válida'); input.focus(); return false; }
+            }
+            return true;
+        },
+    };
+
+    const confirmacion = {
+        formPendiente: null, parentModalEl: null,
+        configurar() {
+            const confirmModal = document.getElementById('modalConfirm'); if (!confirmModal) return;
+            document.getElementById('confirmOkBtn').addEventListener('click', () => {
+                const form = confirmacion.formPendiente; confirmacion.formPendiente = null; confirmacion.parentModalEl = null;
+                if (form) form.submit(); bootstrap.Modal.getInstance(confirmModal)?.hide();
+            });
+            confirmModal.addEventListener('hidden.bs.modal', () => { if (confirmacion.formPendiente && confirmacion.parentModalEl) { confirmacion.parentModalEl.dataset.skipCleanup = 'true'; bootstrap.Modal.getOrCreateInstance(confirmacion.parentModalEl).show(); } });
+            document.querySelectorAll('.form-editar').forEach(form => {
+                form.addEventListener('submit', e => {
+                    e.preventDefault(); confirmacion.formPendiente = form; confirmacion.parentModalEl = form.closest('.modal');
+                    const parentInstance = bootstrap.Modal.getInstance(confirmacion.parentModalEl);
+                    if (parentInstance) { confirmacion.parentModalEl.dataset.skipCleanup = 'true'; confirmacion.parentModalEl.addEventListener('hidden.bs.modal', () => { new bootstrap.Modal(confirmModal).show(); }, { once: true }); parentInstance.hide(); }
+                    else new bootstrap.Modal(confirmModal).show();
+                });
+            });
+        },
+    };
+
+    function showSuccessModal(message) {
+        const modalEl = document.getElementById('modalSuccess'); const msgEl = document.getElementById('successMessage'); if (!modalEl || !msgEl) return;
+        msgEl.innerHTML = `<p>${message}</p>`;
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl); modal.show(); setTimeout(() => modal.hide(), 1300);
+    }
+
+    function initDropZoneExcel() {
+        const dropZone = document.getElementById('dropZoneExcel'); const fileInput = document.getElementById('fileInputExcel'); const clearBtn = document.getElementById('clearFileBtn'); if (!dropZone || !fileInput) return;
+        dropZone.addEventListener('click', function(e) { if (e.target !== clearBtn && !clearBtn.contains(e.target)) fileInput.click(); });
+        ['dragenter','dragover','dragleave','drop'].forEach(ev => dropZone.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
+        ['dragenter','dragover'].forEach(ev => dropZone.addEventListener(ev, () => dropZone.classList.add('dragover')));
+        ['dragleave','drop'].forEach(ev => dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover')));
+        dropZone.addEventListener('drop', e => { const files = e.dataTransfer.files; if (files.length) { fileInput.files = files; updateFile(files[0].name); } });
+        fileInput.addEventListener('change', function() { this.files.length ? updateFile(this.files[0].name) : updateFile(null); });
+        function updateFile(nombre) {
+            const fileDisplay = document.getElementById('fileDisplay'); const clearBtn = document.getElementById('clearFileBtn');
+            if (nombre) { fileDisplay.textContent = '📄 ' + nombre; fileDisplay.style.color = 'var(--azul-medio)'; clearBtn.classList.add('visible'); }
+            else { fileDisplay.textContent = 'Ningún archivo seleccionado'; fileDisplay.style.color = 'var(--text-muted)'; clearBtn.classList.remove('visible'); document.getElementById('fileInputExcel').value = ''; }
+        }
+        window.clearFileInput = function() { fileInput.value = ''; updateFile(null); };
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+       ['dragover', 'drop'].forEach(ev => {
+        window.addEventListener(ev, e => { e.preventDefault(); }, false);
+        });
+        initDropZoneExcel();
+        modales.init();
+        confirmacion.configurar();
+        {% if messages %}{% for message in messages %}{% if message.tags == 'success' %}showSuccessModal("{{ message|escapejs }}");{% endif %}{% endfor %}{% endif %}
+        helpers.setupDateFormatting(document);
+        document.querySelectorAll('tbody tr').forEach((row, i) => { row.style.animationDelay = (i * 0.04) + 's'; });
+        const overlay = document.getElementById('modalDocsOverlay');
+        if (overlay) {
+            overlay.addEventListener('click', e => { if (e.target === e.currentTarget) documentos.cerrarModal(); });
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') documentos.cerrarModal(); });
+        }
+        modales.reabrirConErrores();
+
+        // Ripple en sidebar links
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const r = document.createElement('span');
+                r.className = 'sb-ripple';
+                r.style.left = '18px';
+                r.style.top = '50%';
+                this.appendChild(r);
+                setTimeout(() => r.remove(), 520);
+            });
+        });
+    });
+
+    window.abrirModalDocs             = documentos.abrirModal.bind(documentos);
+    window.cerrarModalDocs            = documentos.cerrarModal.bind(documentos);
+    window.elegirChip                 = documentos.elegirChip.bind(documentos);
+    window.agregarHW                  = documentos.agregarHW.bind(documentos);
+    window.quitarHW                   = documentos.quitarHW.bind(documentos);
+    window.confirmarGenerar           = documentos.generarYDescargar.bind(documentos);
+    window.validarFormularioCompletar = validaciones.formularioCompletar;
+    window.showSuccessModal           = showSuccessModal;
+
+    window.App = {
+        quickAdd: { abrir: quickAdd.abrir.bind(quickAdd), cerrar: quickAdd.cerrar.bind(quickAdd), guardar: quickAdd.guardar.bind(quickAdd) },
+        documentos: { quitarHW: documentos.quitarHW.bind(documentos) },
+    };
+
+</script>
+</body>
+</html>

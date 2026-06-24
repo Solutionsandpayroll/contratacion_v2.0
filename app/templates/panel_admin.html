@@ -1,0 +1,586 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel RRHH · Sistema de Gestión</title>
+
+    <!-- BOOTSTRAP -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FONT AWESOME -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- FUENTES -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;0,6..12,800;0,6..12,900;1,6..12,400&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --azul-oscuro:  #162b47;
+            --azul-medio:   #105788;
+            --rojo:         #e51148;
+            --gris:         #e0e5e5;
+            --blanco:       #ffffff;
+            --negro:        #000000;
+            --color-primary:       var(--azul-medio);
+            --color-primary-dark:  var(--azul-oscuro);
+            --color-accent:        var(--rojo);
+            --color-surface:       var(--blanco);
+            --color-bg:            #f0f3f6;
+            --color-border:        #d4dae2;
+            --azul-oscuro-5:   rgba(22, 43, 71, .05);
+            --azul-oscuro-10:  rgba(22, 43, 71, .10);
+            --azul-medio-10:   rgba(16, 87, 136, .10);
+            --azul-medio-15:   rgba(16, 87, 136, .15);
+            --rojo-10:         rgba(229, 17, 72, .10);
+            --rojo-20:         rgba(229, 17, 72, .20);
+            --text-primary:   var(--azul-oscuro);
+            --text-secondary: #4a5e74;
+            --text-muted:     #7a8fa3;
+            --text-on-dark:   var(--blanco);
+            --radius-xs:  4px;
+            --radius-sm:  6px;
+            --radius:    10px;
+            --radius-lg: 14px;
+            --radius-xl: 20px;
+            --shadow-xs: 0 1px 2px rgba(22,43,71,.06);
+            --shadow-sm: 0 2px 6px rgba(22,43,71,.08), 0 1px 2px rgba(22,43,71,.04);
+            --shadow:    0 4px 16px rgba(22,43,71,.10), 0 2px 4px rgba(22,43,71,.06);
+            --shadow-lg: 0 16px 40px rgba(22,43,71,.16), 0 6px 16px rgba(22,43,71,.08);
+            --sidebar-w: 256px;
+            --btn-h:     38px;
+            --btn-px:    16px;
+            --btn-fs:    .8rem;
+            --btn-fw:    800;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Nunito Sans', system-ui, sans-serif;
+            background: var(--color-bg);
+            background-image:
+                radial-gradient(ellipse 80% 50% at 70% -10%, rgba(16,87,136,.08) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 30% at 5% 100%,  rgba(22,43,71,.05)  0%, transparent 55%);
+            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text-primary);
+            display: flex;
+        }
+
+        i[class*="fa-"] {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            height: 100vh;
+            position: fixed;
+            top: 0; left: 0;
+            background: var(--azul-oscuro);
+            display: flex;
+            flex-direction: column;
+            z-index: 200;
+            border-right: 1px solid rgba(16,87,136,.25);
+            box-shadow: 4px 0 20px rgba(22,43,71,.22);
+            overflow: hidden;
+        }
+
+        .sidebar::after {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 160px; height: 160px;
+            border-radius: 50%;
+            background: rgba(16,87,136,.15);
+            pointer-events: none;
+            animation: sb-orb 5s ease-in-out infinite;
+        }
+        @keyframes sb-orb {
+            0%, 100% { transform: scale(1); opacity: .5; }
+            50%       { transform: scale(1.2); opacity: .9; }
+        }
+
+        .sidebar-logo {
+            padding: 18px 16px 16px;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 72px;
+            position: relative;
+        }
+        .sidebar-logo::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 16px; right: 16px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(16,87,136,.7), transparent);
+        }
+        .sidebar-logo-img {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            max-height: 120px;
+            object-fit: contain;
+            display: block;
+            filter: brightness(0) invert(1);
+            opacity: .9;
+            transition: opacity .2s;
+        }
+        .sidebar-logo-img:hover { opacity: 1; }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 14px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            overflow-y: auto;
+        }
+        .sidebar-section-label {
+            font-size: .58rem;
+            font-weight: 900;
+            color: rgba(255,255,255,.18);
+            text-transform: uppercase;
+            letter-spacing: 1.8px;
+            padding: 14px 12px 6px;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            font-size: .83rem;
+            font-weight: 700;
+            color: rgba(255,255,255,.48);
+            text-decoration: none;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateX(-16px);
+            animation: sb-link-in .38s ease forwards;
+            transition:
+                color .22s ease,
+                background .22s ease,
+                border-color .22s ease,
+                transform .22s cubic-bezier(.34,1.56,.64,1);
+        }
+        .sidebar-link:nth-child(1) { animation-delay: .05s; }
+        .sidebar-link:nth-child(2) { animation-delay: .12s; }
+        .sidebar-link:nth-child(3) { animation-delay: .19s; }
+        .sidebar-link:nth-child(4) { animation-delay: .26s; }
+        .sidebar-link:nth-child(5) { animation-delay: .33s; }
+        @keyframes sb-link-in {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .sidebar-link::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255,255,255,.05);
+            transform: translateX(-110%);
+            transition: transform .32s cubic-bezier(.4,0,.2,1);
+            border-radius: var(--radius-sm);
+        }
+        .sidebar-link:hover::before { transform: translateX(0); }
+
+        .sidebar-link:hover {
+            color: rgba(255,255,255,.9);
+            transform: translateX(5px);
+        }
+
+        .sidebar-link.active {
+            background: linear-gradient(95deg, rgba(16,87,136,.72) 0%, rgba(16,87,136,.38) 100%);
+            color: var(--blanco);
+            border: 1px solid rgba(16,87,136,.35);
+            transform: none;
+        }
+        .sidebar-link.active::before { display: none; }
+
+        .sidebar-link.active::after {
+            content: '';
+            position: absolute;
+            left: 0; top: 20%; bottom: 20%;
+            width: 3px;
+            background: var(--rojo);
+            border-radius: 0 3px 3px 0;
+            animation: sb-accent .35s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        @keyframes sb-accent {
+            from { transform: scaleY(0); opacity: 0; }
+            to   { transform: scaleY(1); opacity: 1; }
+        }
+
+        .sidebar-link-icon {
+            width: 20px; height: 20px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            font-size: .9rem;
+            opacity: .7;
+            transition: opacity .2s, transform .22s cubic-bezier(.34,1.56,.64,1);
+        }
+        .sidebar-link:hover .sidebar-link-icon   { opacity: 1; transform: scale(1.14); }
+        .sidebar-link.active .sidebar-link-icon  { opacity: 1; }
+
+        .sb-ripple {
+            position: absolute;
+            border-radius: 50%;
+            width: 6px; height: 6px;
+            background: rgba(255,255,255,.3);
+            transform: scale(0);
+            pointer-events: none;
+            animation: sb-ripple .5s ease-out forwards;
+        }
+        @keyframes sb-ripple {
+            to { transform: scale(32); opacity: 0; }
+        }
+
+        /* ── BLOQUE DE CIERRE DE SESIÓN (agregado) ── */
+        .sidebar-logout {
+            padding: 6px 10px 4px;
+            border-top: 1px solid rgba(255,255,255,.06);
+            margin-top: auto;
+        }
+
+        .sidebar-footer {
+            padding: 14px 16px;
+            border-top: 1px solid rgba(255,255,255,.06);
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            flex-shrink: 0;
+        }
+        .sidebar-footer-avatar {
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            background: rgba(16,87,136,.5);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px; font-weight: 900; color: var(--blanco);
+            flex-shrink: 0;
+            border: 1.5px solid rgba(16,87,136,.55);
+        }
+        .sidebar-footer-info { flex: 1; min-width: 0; }
+        .sidebar-footer-name {
+            font-size: .72rem; font-weight: 800;
+            color: rgba(255,255,255,.5);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .sidebar-version {
+            font-size: .62rem; font-weight: 700;
+            color: rgba(255,255,255,.18);
+            letter-spacing: .4px;
+        }
+
+        .main-content {
+            margin-left: var(--sidebar-w);
+            flex: 1;
+            height: 100vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .topbar {
+            background: var(--blanco);
+            border-bottom: 1px solid var(--color-border);
+            padding: 0 28px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-xs);
+            flex-shrink: 0;
+        }
+        .topbar-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .breadcrumb-trail {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .78rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+        .breadcrumb-trail i { font-size: .75rem; opacity: .6; }
+        .breadcrumb-trail .current { color: var(--azul-oscuro); font-weight: 800; }
+        .topbar-user { display: flex; align-items: center; gap: 10px; }
+        .user-badge {
+            width: 32px; height: 32px;
+            background: var(--azul-oscuro);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--blanco);
+            font-size: .72rem; font-weight: 900; letter-spacing: .3px;
+        }
+        .user-label { font-size: .78rem; font-weight: 700; color: var(--text-secondary); }
+
+        .main {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 26px 24px 64px;
+            width: 100%;
+            flex: 1;
+        }
+
+        /* ── DASHBOARD CARDS ── */
+        .welcome-message {
+            margin-bottom: 2rem;
+        }
+        .welcome-message h1 {
+            font-family: 'Calibri', 'Nunito Sans', sans-serif;
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: var(--azul-oscuro);
+            margin-bottom: 0.25rem;
+        }
+        .welcome-message p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .dash-card {
+            background: var(--blanco);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem 1.4rem;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            animation: fadeSlideDown .4s ease both;
+        }
+        .dash-card:nth-child(1) { animation-delay: 0s; }
+        .dash-card:nth-child(2) { animation-delay: .08s; }
+        .dash-card:nth-child(3) { animation-delay: .16s; }
+
+        .dash-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--azul-medio-15);
+        }
+        .dash-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 3px;
+            background: linear-gradient(90deg, var(--azul-medio), var(--azul-oscuro));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+            border-radius: 0 0 2px 2px;
+        }
+        .dash-card:hover::before { transform: scaleX(1); }
+
+        .dash-card-icon {
+            width: 46px; height: 46px;
+            background: var(--azul-medio-10);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--azul-medio);
+            flex-shrink: 0;
+            transition: background 0.2s, color 0.2s, transform 0.3s cubic-bezier(.34,1.56,.64,1);
+        }
+        .dash-card:hover .dash-card-icon {
+            background: var(--azul-medio);
+            color: #fff;
+            transform: rotate(5deg) scale(1.08);
+        }
+
+        .dash-card-content h3 {
+            font-family: 'Calibri', 'Nunito Sans', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--azul-oscuro);
+            margin-bottom: 0.15rem;
+        }
+        .dash-card-content p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .dash-card-arrow {
+            margin-left: auto;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            transition: transform 0.2s, color 0.2s;
+        }
+        .dash-card:hover .dash-card-arrow {
+            transform: translateX(4px);
+            color: var(--azul-medio);
+        }
+
+        @keyframes fadeSlideDown {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { width: 0; overflow: hidden; }
+            .main-content { margin-left: 0; }
+            .topbar { padding: 0 14px; }
+            .main { padding: 16px 12px 48px; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══════════ SIDEBAR ═══════════ -->
+<aside class="sidebar">
+    <div class="sidebar-logo">
+        <img src="{% static 'img/logo_biocore_blanco.png' %}" alt="Logo empresa" class="sidebar-logo-img">
+    </div>
+    <nav class="sidebar-nav">
+        <div class="sidebar-section-label">Navegación</div>
+
+        <a href="{% url 'panel_admin' %}" class="sidebar-link active">
+            <span class="sidebar-link-icon"><i class="fa-solid fa-gauge-high"></i></span>
+            Panel
+        </a>
+
+        <a href="{% url 'empleados' %}" class="sidebar-link">
+            <span class="sidebar-link-icon"><i class="fa-solid fa-users"></i></span>
+            Empleados
+        </a>
+        <a href="{% url 'generar_ficha_empleados' %}" class="sidebar-link">
+            <span class="sidebar-link-icon"><i class="fa-solid fa-file-lines"></i></span>
+            Ficha de Ingresos
+        </a>
+        <a href="{% url 'beneficios_empleados' %}" class="sidebar-link">
+            <span class="sidebar-link-icon"><i class="fa-solid fa-gift"></i></span>
+            Beneficios
+        </a>
+    </nav>
+
+    <!-- Cierre de sesión justo encima del footer -->
+    <div class="sidebar-logout">
+        <a href="{% url 'cerrar_sesion' %}" class="sidebar-link" style="animation: none; opacity: 1; transform: none;">
+            <span class="sidebar-link-icon"><i class="fa-solid fa-sign-out-alt"></i></span>
+            Cerrar Sesión
+        </a>
+    </div>
+
+    <div class="sidebar-footer">
+        <div class="sidebar-footer-avatar">AD</div>
+        <div class="sidebar-footer-info">
+            <div class="sidebar-footer-name">Administrador</div>
+            <div class="sidebar-version">v2.0 · Sistema RRHH</div>
+        </div>
+    </div>
+</aside>
+
+<!-- ═══════════ CONTENIDO PRINCIPAL ═══════════ -->
+<div class="main-content">
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="breadcrumb-trail">
+                <i class="fa-solid fa-house"></i> Panel
+                <i class="fa-solid fa-chevron-right"></i>
+                <span class="current">Inicio</span>
+            </div>
+            <div class="topbar-user">
+                <div class="user-badge">AD</div>
+                <span class="user-label">Bienvenido</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <!-- Mensaje de bienvenida -->
+        <div class="welcome-message">
+            <h1>Panel de Recursos Humanos</h1>
+            <p>Accede rápidamente a las herramientas de gestión de personal.</p>
+        </div>
+
+        <!-- Tarjetas de acceso rápido (Dashboard) -->
+        <div class="dashboard-grid">
+            <!-- Empleados -->
+            <a href="{% url 'empleados' %}" class="dash-card">
+                <div class="dash-card-icon"><i class="fa-solid fa-users"></i></div>
+                <div class="dash-card-content">
+                    <h3>Empleados</h3>
+                    <p>Gestiona la información de los empleados, crea, edita y consulta registros.</p>
+                </div>
+                <i class="fa-solid fa-arrow-right dash-card-arrow"></i>
+            </a>
+
+            <!-- Ficha de Ingresos -->
+            <a href="{% url 'generar_ficha_empleados' %}" class="dash-card">
+                <div class="dash-card-icon"><i class="fa-solid fa-file-lines"></i></div>
+                <div class="dash-card-content">
+                    <h3>Ficha de Ingresos</h3>
+                    <p>Genera las fichas de ingreso para los nuevos empleados.</p>
+                </div>
+                <i class="fa-solid fa-arrow-right dash-card-arrow"></i>
+            </a>
+
+            <!-- Beneficios -->
+            <a href="{% url 'beneficios_empleados' %}" class="dash-card">
+                <div class="dash-card-icon"><i class="fa-solid fa-gift"></i></div>
+                <div class="dash-card-content">
+                    <h3>Beneficios</h3>
+                    <p>Administra auxilios, bonificaciones y beneficios corporativos.</p>
+                </div>
+                <i class="fa-solid fa-arrow-right dash-card-arrow"></i>
+            </a>
+        </div>
+
+        <!-- Aquí puedes incluir más contenido dinámico si lo deseas -->
+        {% block contenido_extra %}{% endblock %}
+    </main>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Efecto ripple en los enlaces del sidebar (opcional)
+    document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const r = document.createElement('span');
+            r.className = 'sb-ripple';
+            r.style.left = '18px';
+            r.style.top = '50%';
+            this.appendChild(r);
+            setTimeout(() => r.remove(), 520);
+        });
+    });
+</script>
+
+</body>
+</html>
