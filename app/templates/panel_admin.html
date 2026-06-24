@@ -444,8 +444,39 @@
             color: var(--azul-medio);
         }
 
+        /* ── ESTILOS DE ALERTA (nuevo) ── */
+        .alert {
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-size: .85rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeSlideDown .3s ease;
+        }
+        .alert-success {
+            background: #e6f9ee;
+            color: #0d5228;
+            border: 1px solid #a3e4bb;
+        }
+        .alert-error {
+            background: var(--rojo-10);
+            color: #7a0020;
+            border: 1px solid var(--rojo-20);
+        }
+        .alert-info {
+            background: #e8f0fe;
+            color: #0a3c5e;
+            border: 1px solid #b3d4fc;
+        }
+        .messages {
+            margin-bottom: 18px;
+        }
+
         @keyframes fadeSlideDown {
-            from { opacity: 0; transform: translateY(16px); }
+            from { opacity: 0; transform: translateY(-10px); }
             to   { opacity: 1; transform: translateY(0); }
         }
 
@@ -521,6 +552,20 @@
     </header>
 
     <main class="main">
+        <!-- Bloque de mensajes (con el nuevo diseño de alertas) -->
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert 
+                    {% if message.tags == 'success' %}alert-success
+                    {% elif message.tags == 'error' %}alert-error
+                    {% else %}alert-info{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <!-- Mensaje de bienvenida -->
         <div class="welcome-message">
             <h1>Panel de Recursos Humanos</h1>
