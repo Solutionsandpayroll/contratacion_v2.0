@@ -145,3 +145,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 POWER_AUTOMATE_URL = (
     "https://default90167654ed084e3d85e72724f8597c.cf.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/1d5bafd0be73439c832a1572bf02c68c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=eWUzJm6iqj9SoxzcVOybR9_5y9n2fYgOsF9lbpmIc3g"
 )
+
+
+# Duración de la sesión en segundos (30 minutos)
+SESSION_COOKIE_AGE = 1800
+
+# Renovar la sesión con cada petición (así los 30 minutos se cuentan desde la última actividad)
+SESSION_SAVE_EVERY_REQUEST = True
