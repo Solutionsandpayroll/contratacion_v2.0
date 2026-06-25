@@ -6,8 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generar Ficha de Ingresos</title>
 
+    <!-- BOOTSTRAP -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- TOM SELECT -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
+    <!-- FONT AWESOME -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <!-- FUENTES -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;0,6..12,800;0,6..12,900;1,6..12,400&display=swap" rel="stylesheet">
 
     <style>
@@ -17,25 +22,37 @@
             --rojo:         #e51148;
             --gris:         #e0e5e5;
             --blanco:       #ffffff;
-            --color-bg:     #f0f3f6;
-            --color-border: #d4dae2;
-            --azul-medio-10: rgba(16,87,136,.10);
-            --rojo-10:       rgba(229,17,72,.10);
-            --rojo-20:       rgba(229,17,72,.20);
+            --negro:        #000000;
+            --color-primary:       var(--azul-medio);
+            --color-primary-dark:  var(--azul-oscuro);
+            --color-accent:        var(--rojo);
+            --color-surface:       var(--blanco);
+            --color-bg:            #f0f3f6;
+            --color-border:        #d4dae2;
+            --azul-oscuro-5:   rgba(22, 43, 71, .05);
+            --azul-oscuro-10:  rgba(22, 43, 71, .10);
+            --azul-medio-10:   rgba(16, 87, 136, .10);
+            --azul-medio-15:   rgba(16, 87, 136, .15);
+            --rojo-10:         rgba(229, 17, 72, .10);
+            --rojo-20:         rgba(229, 17, 72, .20);
             --text-primary:   var(--azul-oscuro);
             --text-secondary: #4a5e74;
             --text-muted:     #7a8fa3;
-            --radius-sm: 6px;
+            --text-on-dark:   var(--blanco);
+            --radius-xs:  4px;
+            --radius-sm:  6px;
             --radius:    10px;
             --radius-lg: 14px;
+            --radius-xl: 20px;
             --shadow-xs: 0 1px 2px rgba(22,43,71,.06);
             --shadow-sm: 0 2px 6px rgba(22,43,71,.08), 0 1px 2px rgba(22,43,71,.04);
             --shadow:    0 4px 16px rgba(22,43,71,.10), 0 2px 4px rgba(22,43,71,.06);
+            --shadow-lg: 0 16px 40px rgba(22,43,71,.16), 0 6px 16px rgba(22,43,71,.08);
             --sidebar-w: 256px;
-            --btn-h:  38px;
-            --btn-px: 16px;
-            --btn-fs: .8rem;
-            --btn-fw: 800;
+            --btn-h:     38px;
+            --btn-px:    16px;
+            --btn-fs:    .8rem;
+            --btn-fw:    800;
         }
 
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -45,7 +62,7 @@
             background: var(--color-bg);
             background-image:
                 radial-gradient(ellipse 80% 50% at 70% -10%, rgba(16,87,136,.08) 0%, transparent 60%),
-                radial-gradient(ellipse 40% 30% at 5% 100%, rgba(22,43,71,.05) 0%, transparent 55%);
+                radial-gradient(ellipse 40% 30% at 5% 100%,  rgba(22,43,71,.05)  0%, transparent 55%);
             min-height: 100vh;
             height: 100vh;
             overflow: hidden;
@@ -53,7 +70,13 @@
             display: flex;
         }
 
-        /* ── SIDEBAR ── */
+        i[class*="fa-"] {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
         .sidebar {
             width: var(--sidebar-w);
             height: 100vh;
@@ -67,6 +90,7 @@
             box-shadow: 4px 0 20px rgba(22,43,71,.22);
             overflow: hidden;
         }
+
         .sidebar::after {
             content: '';
             position: absolute;
@@ -127,6 +151,7 @@
             letter-spacing: 1.8px;
             padding: 14px 12px 6px;
         }
+
         .sidebar-link {
             display: flex;
             align-items: center;
@@ -143,13 +168,19 @@
             opacity: 0;
             transform: translateX(-16px);
             animation: sb-link-in .38s ease forwards;
-            transition: color .22s, background .22s, border-color .22s, transform .22s cubic-bezier(.34,1.56,.64,1);
+            transition:
+                color .22s ease,
+                background .22s ease,
+                border-color .22s ease,
+                transform .22s cubic-bezier(.34,1.56,.64,1);
         }
         .sidebar-link:nth-child(1) { animation-delay: .05s; }
         .sidebar-link:nth-child(2) { animation-delay: .12s; }
         .sidebar-link:nth-child(3) { animation-delay: .19s; }
         .sidebar-link:nth-child(4) { animation-delay: .26s; }
-        @keyframes sb-link-in { to { opacity: 1; transform: translateX(0); } }
+        @keyframes sb-link-in {
+            to { opacity: 1; transform: translateX(0); }
+        }
 
         .sidebar-link::before {
             content: '';
@@ -161,7 +192,11 @@
             border-radius: var(--radius-sm);
         }
         .sidebar-link:hover::before { transform: translateX(0); }
-        .sidebar-link:hover { color: rgba(255,255,255,.9); transform: translateX(5px); }
+
+        .sidebar-link:hover {
+            color: rgba(255,255,255,.9);
+            transform: translateX(5px);
+        }
 
         .sidebar-link.active {
             background: linear-gradient(95deg, rgba(16,87,136,.72) 0%, rgba(16,87,136,.38) 100%);
@@ -170,6 +205,7 @@
             transform: none;
         }
         .sidebar-link.active::before { display: none; }
+
         .sidebar-link.active::after {
             content: '';
             position: absolute;
@@ -192,8 +228,8 @@
             opacity: .7;
             transition: opacity .2s, transform .22s cubic-bezier(.34,1.56,.64,1);
         }
-        .sidebar-link:hover .sidebar-link-icon  { opacity: 1; transform: scale(1.14); }
-        .sidebar-link.active .sidebar-link-icon { opacity: 1; }
+        .sidebar-link:hover .sidebar-link-icon   { opacity: 1; transform: scale(1.14); }
+        .sidebar-link.active .sidebar-link-icon  { opacity: 1; }
 
         .sb-ripple {
             position: absolute;
@@ -204,13 +240,16 @@
             pointer-events: none;
             animation: sb-ripple .5s ease-out forwards;
         }
-        @keyframes sb-ripple { to { transform: scale(32); opacity: 0; } }
+        @keyframes sb-ripple {
+            to { transform: scale(32); opacity: 0; }
+        }
 
         .sidebar-logout {
             padding: 6px 10px 4px;
             border-top: 1px solid rgba(255,255,255,.06);
             margin-top: auto;
         }
+
         .sidebar-footer {
             padding: 14px 16px;
             border-top: 1px solid rgba(255,255,255,.06);
@@ -240,123 +279,116 @@
             letter-spacing: .4px;
         }
 
-        /* ── LAYOUT ── */
-        .main-content {
-            margin-left: var(--sidebar-w);
-            flex: 1;
-            height: 100vh;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
+        .main-content { margin-left: var(--sidebar-w); flex: 1; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
 
-        /* ── TOPBAR ── */
         .topbar {
-            background: var(--blanco);
-            border-bottom: 1px solid var(--color-border);
-            padding: 0 28px;
-            position: sticky; top: 0; z-index: 100;
-            box-shadow: var(--shadow-xs);
-            flex-shrink: 0;
+            background: var(--blanco); border-bottom: 1px solid var(--color-border);
+            padding: 0 28px; position: sticky; top: 0; z-index: 100;
+            box-shadow: var(--shadow-xs); flex-shrink: 0;
         }
-        .topbar-inner {
-            max-width: 1440px; margin: 0 auto;
-            height: 60px;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .breadcrumb-trail {
-            display: flex; align-items: center; gap: 6px;
-            font-size: .78rem; font-weight: 700; color: var(--text-muted);
-        }
+        .topbar-inner { max-width: 1440px; margin: 0 auto; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+        .breadcrumb-trail { display: flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 700; color: var(--text-muted); }
         .breadcrumb-trail i { font-size: .75rem; opacity: .6; }
         .breadcrumb-trail .current { color: var(--azul-oscuro); font-weight: 800; }
         .topbar-user { display: flex; align-items: center; gap: 10px; }
-        .user-badge {
-            width: 32px; height: 32px;
-            background: var(--azul-oscuro);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--blanco);
-            font-size: .72rem; font-weight: 900;
-        }
+        .user-badge { width: 32px; height: 32px; background: var(--azul-oscuro); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--blanco); font-size: .72rem; font-weight: 900; letter-spacing: .3px; }
         .user-label { font-size: .78rem; font-weight: 700; color: var(--text-secondary); }
 
-        /* ── MAIN ── */
-        .main {
-            max-width: 1440px; margin: 0 auto;
-            padding: 26px 24px 64px;
-            width: 100%; flex: 1;
-        }
+        .main { max-width: 1440px; margin: 0 auto; padding: 26px 24px 64px; width: 100%; flex: 1; }
 
-        /* ── ALERTS ── */
+        .alert {
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-size: .85rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeSlideDown .3s ease;
+        }
+        .alert-success {
+            background: #e6f9ee;
+            color: #0d5228;
+            border: 1px solid #a3e4bb;
+        }
+        .alert-error {
+            background: var(--rojo-10);
+            color: #7a0020;
+            border: 1px solid var(--rojo-20);
+        }
+        .messages { margin-bottom: 18px; }
+
         @keyframes fadeSlideDown {
             from { opacity: 0; transform: translateY(-10px); }
             to   { opacity: 1; transform: translateY(0); }
         }
-        .alert {
-            padding: 12px 16px;
-            border-radius: var(--radius);
-            font-size: .85rem; font-weight: 700;
-            margin-bottom: 10px;
-            display: flex; align-items: center; gap: 10px;
-            animation: fadeSlideDown .3s ease;
-        }
-        .alert-success { background: #e6f9ee; color: #0d5228; border: 1px solid #a3e4bb; }
-        .alert-error   { background: var(--rojo-10); color: #7a0020; border: 1px solid var(--rojo-20); }
-        .messages { margin-bottom: 18px; }
 
-        .alert-validation {
-            background: var(--rojo-10);
-            color: #7a0020;
-            border: 1px solid var(--rojo-20);
-            padding: 12px 16px;
-            border-radius: var(--radius);
-            font-size: .85rem; font-weight: 700;
-            margin-bottom: 16px;
-            display: flex; align-items: center; gap: 10px;
-            animation: fadeSlideDown .3s ease;
-        }
-
-        /* ── TOOLBAR ── */
         .toolbar {
-            display: flex; align-items: center; gap: 10px;
-            margin-bottom: 18px; flex-wrap: wrap;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
         }
         .toolbar-title {
-            font-size: 1.35rem; font-weight: 700;
+            font-family: 'Calibri', 'Nunito Sans', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
             color: var(--azul-oscuro);
-            display: flex; align-items: center; gap: 9px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            letter-spacing: -.2px;
         }
         .toolbar-title-icon {
             width: 32px; height: 32px;
             background: var(--azul-medio-10);
             border-radius: var(--radius-sm);
-            display: flex; align-items: center; justify-content: center;
-            font-size: .95rem; color: var(--azul-medio);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: .95rem;
+            color: var(--azul-medio);
         }
         .toolbar-count {
-            display: inline-flex; align-items: center;
-            background: var(--azul-medio); color: var(--blanco);
-            font-size: .68rem; font-weight: 800;
-            padding: 2px 9px; border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            background: var(--azul-medio);
+            color: var(--blanco);
+            font-size: .68rem;
+            font-weight: 800;
+            padding: 2px 9px;
+            border-radius: 999px;
+            letter-spacing: .3px;
+            margin-left: 2px;
         }
 
-        /* ── BUTTONS ── */
         .btn {
-            display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
             height: var(--btn-h);
             padding: 0 var(--btn-px);
-            border: none; border-radius: var(--radius-sm);
+            border: none;
+            border-radius: var(--radius-sm);
             font-family: 'Nunito Sans', sans-serif;
-            font-size: var(--btn-fs); font-weight: var(--btn-fw);
-            cursor: pointer; text-decoration: none;
-            white-space: nowrap; letter-spacing: .2px;
-            position: relative; overflow: hidden;
-            transition: background .2s, box-shadow .2s, transform .2s cubic-bezier(.34,1.56,.64,1);
+            font-size: var(--btn-fs);
+            font-weight: var(--btn-fw);
+            cursor: pointer;
+            text-decoration: none;
+            white-space: nowrap;
+            letter-spacing: .2px;
+            position: relative;
+            overflow: hidden;
+            transition: background .2s ease, box-shadow .2s ease, transform .2s cubic-bezier(.34,1.56,.64,1);
         }
         .btn::after {
             content: '';
-            position: absolute; inset: 0;
+            position: absolute;
+            inset: 0;
             background: rgba(255,255,255,0);
             transition: background .25s;
             pointer-events: none;
@@ -364,11 +396,17 @@
         .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(22,43,71,.15); }
         .btn:hover::after { background: rgba(255,255,255,.12); }
         .btn:active { transform: translateY(0) scale(.97); }
-        .btn-success { background: var(--azul-oscuro); color: var(--blanco); }
+
+        .btn-primary   { background: var(--azul-medio); color: var(--blanco); }
+        .btn-primary:hover { background: var(--azul-oscuro); }
+        .btn-success   { background: var(--azul-oscuro); color: var(--blanco); }
         .btn-success:hover { background: #0d1f35; }
+        .btn-danger    { background: var(--rojo); color: var(--blanco); }
+        .btn-danger:hover { background: #c20e3e; }
+        .btn-ghost { background: var(--blanco); border: 1.5px solid var(--color-border); color: var(--text-secondary); }
+        .btn-ghost:hover { background: var(--gris); border-color: #b8c2cc; }
         .btn i { font-size: .85rem; flex-shrink: 0; }
 
-        /* ── CARD ── */
         .card {
             background: var(--blanco);
             border: 1px solid var(--color-border);
@@ -378,18 +416,25 @@
             animation: fadeSlideDown .35s ease;
         }
 
-        /* ── FILTRO BAR ── */
         .filtro-bar {
-            display: flex; align-items: center; gap: 16px;
-            margin-bottom: 20px; flex-wrap: wrap;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         .filtro-bar .form-group {
-            display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
         }
         .filtro-bar .form-group label {
-            font-size: .68rem; font-weight: 800;
+            font-size: .68rem;
+            font-weight: 800;
             color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: .6px;
+            text-transform: uppercase;
+            letter-spacing: .6px;
             white-space: nowrap;
         }
         .filtro-bar .form-group input[type="month"] {
@@ -398,7 +443,8 @@
             border: 1.5px solid var(--color-border);
             border-radius: var(--radius-sm);
             font-family: 'Nunito Sans', sans-serif;
-            font-size: .85rem; font-weight: 600;
+            font-size: .85rem;
+            font-weight: 600;
             color: var(--azul-oscuro);
             background: #f9fbfd;
             transition: border-color .18s, box-shadow .18s;
@@ -412,21 +458,32 @@
         }
 
         .search-wrapper {
-            position: relative; flex: 1; min-width: 220px; max-width: 400px;
+            position: relative;
+            flex: 1;
+            min-width: 220px;
+            max-width: 400px;
         }
         .search-wrapper .search-icon {
-            position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
-            pointer-events: none; color: var(--text-muted);
-            display: flex; align-items: center;
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
         }
         .search-wrapper input {
-            width: 100%; height: var(--btn-h);
+            width: 100%;
+            height: var(--btn-h);
             padding: 0 36px 0 40px;
             border: 1.5px solid var(--color-border);
             border-radius: var(--radius-sm);
             font-family: 'Nunito Sans', sans-serif;
-            font-size: .85rem; font-weight: 600;
-            background: #f9fbfd; color: var(--azul-oscuro);
+            font-size: .85rem;
+            font-weight: 600;
+            background: #f9fbfd;
+            color: var(--azul-oscuro);
             transition: border-color .18s, box-shadow .18s;
         }
         .search-wrapper input:focus {
@@ -437,78 +494,94 @@
         }
         .search-wrapper input::placeholder { color: var(--text-muted); font-weight: 600; }
         .search-clear {
-            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
-            background: none; border: none; color: var(--text-muted);
-            font-size: .9rem; cursor: pointer; padding: 3px 5px;
-            border-radius: 4px; display: none; line-height: 1;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: .9rem;
+            cursor: pointer;
+            padding: 3px 5px;
+            border-radius: 4px;
+            display: none;
+            line-height: 1;
             transition: color .15s;
         }
         .search-clear:hover { color: var(--text-secondary); }
         .search-clear.visible { display: flex; align-items: center; }
 
-        /* ── SELECCIONAR TODOS ── */
         .seleccionar-todos {
             margin-bottom: 16px;
-            font-weight: 700; font-size: .82rem; color: var(--text-secondary);
+            font-weight: 700;
+            font-size: .82rem;
+            color: var(--text-secondary);
         }
         .seleccionar-todos label {
-            display: inline-flex; align-items: center; gap: 8px;
-            cursor: pointer; user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
         }
         .seleccionar-todos input[type="checkbox"] {
-            width: 18px; height: 18px;
-            cursor: pointer; accent-color: var(--azul-medio);
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--azul-medio);
         }
 
-        /* ── TABLA ── */
         .table-outer {
             background: var(--blanco);
             border: 1px solid var(--color-border);
             border-radius: var(--radius);
             overflow: hidden;
             box-shadow: var(--shadow-sm);
-            display: flex; flex-direction: column;
+            display: flex;
+            flex-direction: column;
             max-height: 58vh;
-            /* CLAVE: desactiva el scroll-anchoring de Chrome que causaba el salto */
-            overflow-anchor: none;
         }
         .table-scroll {
             overflow-x: auto;
             overflow-y: auto;
             flex: 1;
-            /* CLAVE: desactiva el scroll-anchoring también en el contenedor scrollable */
             overflow-anchor: none;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: .77rem;
-            white-space: nowrap;
-            min-width: 1100px;
+            table-layout: fixed;
         }
+
         thead {
             background: #f5f7fa;
             border-bottom: 2px solid var(--color-border);
-            position: sticky; top: 0; z-index: 2;
+            position: sticky;
+            top: 0;
+            z-index: 2;
         }
         th {
-            padding: 11px 10px;
+            padding: 8px 6px;
             text-align: center;
-            font-size: .62rem; font-weight: 800;
+            font-size: .62rem;
+            font-weight: 800;
             color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: .7px;
+            text-transform: uppercase;
+            letter-spacing: .7px;
             background: #f5f7fa;
         }
-        th:first-child { text-align: center; width: 50px; }
-        th:nth-child(2) { text-align: left; }
+        th:first-child { text-align: center; width: 40px; }
         td {
-            padding: 9px 10px;
+            padding: 6px 6px;
             border-bottom: 1px solid #eef1f5;
             color: var(--text-secondary);
             text-align: center;
             vertical-align: middle;
         }
         td:nth-child(2) { text-align: left; font-weight: 700; color: var(--azul-oscuro); }
+        
         tbody tr {
             opacity: 0;
             animation: rowIn .45s ease forwards;
@@ -518,19 +591,27 @@
             from { opacity: 0; transform: translateY(12px); }
             to   { opacity: 1; transform: translateY(0); }
         }
+
+        /* Estilos para el agrupamiento de 2 filas por empleado */
+        tr.fila-principal td { border-bottom: none !important; }
+        tr.fila-editable td { border-top: none; }
+        tr.fila-editable { border-bottom: 1px solid #eef1f5; }
         tbody tr:hover td { background: #f0f5fb; }
 
-        /* ── INPUTS EN CELDAS ── */
+        /* Estilos para los inputs y selects de la segunda fila */
         td input[type="text"],
         td select {
-            padding: 7px 10px;
+            padding: 6px 4px;
             border: 1.5px solid var(--color-border);
             border-radius: var(--radius-sm);
             font-family: 'Nunito Sans', sans-serif;
-            font-size: .8rem; font-weight: 600;
-            background: #f9fbfd; color: var(--azul-oscuro);
+            font-size: .75rem;
+            font-weight: 600;
+            background: #f9fbfd;
+            color: var(--azul-oscuro);
             transition: border-color .15s, box-shadow .15s;
-            width: 100%; min-width: 0;
+            width: 100%;
+            min-width: 0;
         }
         td input[type="text"]:focus,
         td select:focus {
@@ -541,52 +622,25 @@
         }
         td select {
             appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 10px center;
-            padding-right: 32px;
+            background-position: right 8px center;
+            padding-right: 28px;
             cursor: pointer;
         }
         td input[type="checkbox"] {
-            width: 17px; height: 17px;
-            cursor: pointer; accent-color: var(--azul-medio);
+            width: 17px;
+            height: 17px;
+            cursor: pointer;
+            accent-color: var(--azul-medio);
         }
 
-        /*
-         * ── CAMPO CIUDAD CON DATALIST NATIVO ──
-         *
-         * Reemplaza completamente Tom Select.
-         * El datalist nativo del navegador NO causa saltos de scroll
-         * porque el dropdown lo gestiona el sistema operativo,
-         * fuera del flujo del DOM de la página.
-         *
-         * Estructura en el HTML:
-         *   <input list="ciudades-list" class="ciudad-input" ...>
-         *   <input type="hidden" class="ciudad-hidden" ...>
-         * El input visible muestra el texto; el hidden guarda el ID para el POST.
-         */
-        .ciudad-input {
-            padding: 7px 10px;
-            border: 1.5px solid var(--color-border);
-            border-radius: var(--radius-sm);
-            font-family: 'Nunito Sans', sans-serif;
-            font-size: .8rem; font-weight: 600;
-            background: #f9fbfd; color: var(--azul-oscuro);
-            transition: border-color .15s, box-shadow .15s;
-            width: 260px; min-width: 0;
-        }
-        .ciudad-input:focus {
-            outline: none;
-            border-color: var(--azul-medio);
-            background: var(--blanco);
-            box-shadow: 0 0 0 2px rgba(16,87,136,.1);
-        }
-        .ciudad-input::placeholder { color: var(--text-muted); font-weight: 600; }
-
-        /* ── EMPTY STATE ── */
         .empty-state {
             padding: 60px 20px;
-            text-align: center; color: var(--text-muted);
+            text-align: center;
+            color: var(--text-muted);
             animation: fadeSlideDown .5s ease;
         }
         .empty-state i { font-size: 3rem; opacity: .35; margin-bottom: 12px; display: block; }
@@ -595,7 +649,159 @@
 
         .actions-row {
             margin-top: 22px;
-            display: flex; justify-content: flex-end; gap: 10px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .ts-wrapper .ts-dropdown {
+            border: 1px solid #d4dae2 !important;
+            border-radius: 10px !important;
+            box-shadow: 0 12px 32px rgba(22,43,71,.12), 0 4px 8px rgba(22,43,71,.06) !important;
+            margin-top: 6px !important;
+            overflow: hidden !important;
+            background: #ffffff !important;
+            z-index: 9999 !important;
+        }
+        .ts-wrapper .ts-dropdown .option {
+            padding: 10px 14px !important;
+            font-size: 0.82rem !important;
+            font-weight: 600 !important;
+            color: var(--azul-oscuro) !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            border-bottom: 1px solid #f0f3f6 !important;
+        }
+        .ts-wrapper .ts-dropdown .option:last-child { border-bottom: none !important; }
+        .ts-wrapper .ts-dropdown .option:hover,
+        .ts-wrapper .ts-dropdown .option.active {
+            background: var(--azul-medio) !important;
+            color: #ffffff !important;
+        }
+        .ts-wrapper .ts-dropdown .option.selected {
+            background: var(--azul-medio) !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+        .ts-wrapper .ts-dropdown .search {
+            padding: 8px !important;
+            border-bottom: 1px solid #f0f3f6 !important;
+        }
+        .ts-wrapper .ts-dropdown .search input {
+            border: 1.5px solid #e0e5ea !important;
+            border-radius: 6px !important;
+            padding: 7px 12px !important;
+            font-family: 'Nunito Sans', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: 0.8rem !important;
+            width: 100% !important;
+            outline: none !important;
+            position: static !important;
+            opacity: 1 !important;
+            height: auto !important;
+            pointer-events: auto !important;
+        }
+        .ts-wrapper .ts-dropdown .search input:focus {
+            border-color: var(--azul-medio) !important;
+            box-shadow: 0 0 0 3px rgba(16,87,136,.08) !important;
+        }
+        .ts-wrapper .ts-dropdown .no-results {
+            padding: 12px !important;
+            color: var(--text-muted) !important;
+            font-weight: 600 !important;
+            text-align: center !important;
+        }
+
+        .ts-wrapper.single .ts-control {
+            height: 34px !important;
+            min-height: 34px !important;
+            max-height: 34px !important;
+            flex-wrap: nowrap !important;
+            overflow: hidden !important;
+            display: flex !important;
+            align-items: center !important;
+            background: #f9fbfd !important;
+            border: 1.5px solid #e0e5ea !important;
+            border-radius: 8px !important;
+            padding: 0 32px 0 8px !important;
+            font-family: 'Nunito Sans', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: 0.75rem !important;
+            color: var(--azul-oscuro) !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+            cursor: pointer !important;
+            position: relative !important;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23162b47'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") !important;
+            background-repeat: no-repeat !important;
+            background-position: right 12px center !important;
+        }
+        .ts-wrapper.single.focus .ts-control,
+        .ts-wrapper.single .ts-control:focus-within {
+            background: #ffffff !important;
+            border-color: var(--azul-medio) !important;
+            box-shadow: 0 0 0 4px rgba(16,87,136,.08), 0 4px 12px rgba(22,43,71,.06) !important;
+            transform: translateY(-1px) !important;
+        }
+        .ts-wrapper.single .ts-control .item {
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            display: block !important;
+            line-height: 34px !important;
+        }
+        .ts-wrapper.single .ts-control input {
+            position: absolute !important;
+            opacity: 0 !important;
+            width: 1px !important;
+            height: 1px !important;
+            pointer-events: none !important;
+            flex: 0 !important;
+        }
+        .ts-wrapper.single.input-active .ts-control .item {
+            opacity: 0 !important;
+            position: absolute !important;
+            left: -9999px !important;
+            pointer-events: none !important;
+        }
+        .ts-wrapper.single.input-active .ts-control input {
+            position: static !important;
+            opacity: 1 !important;
+            width: 100% !important;
+            min-width: 2px !important;
+            height: auto !important;
+            pointer-events: auto !important;
+            flex: 1 1 100% !important;
+            font-family: 'Nunito Sans', sans-serif !important;
+            font-weight: 600 !important;
+            font-size: 0.75rem !important;
+            color: var(--azul-oscuro) !important;
+            background: transparent !important;
+            border: none !important;
+            outline: none !important;
+            padding: 0 !important;
+        }
+
+        .alert-validation {
+            background: var(--rojo-10);
+            color: #7a0020;
+            border: 1px solid var(--rojo-20);
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-size: .85rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeSlideDown .3s ease;
+        }
+        .alert-validation i {
+            font-size: 1rem;
+            color: var(--rojo);
         }
 
         @media (max-width: 768px) {
@@ -612,17 +818,18 @@
 </head>
 <body>
 
-<!-- ===== SIDEBAR ===== -->
 <aside class="sidebar">
     <div class="sidebar-logo">
         <img src="{% static 'img/logo_biocore_blanco.png' %}" alt="Logo empresa" class="sidebar-logo-img">
     </div>
     <nav class="sidebar-nav">
         <div class="sidebar-section-label">Navegación</div>
+
         <a href="{% url 'panel_admin' %}" class="sidebar-link">
             <span class="sidebar-link-icon"><i class="fa-solid fa-gauge-high"></i></span>
             Panel
         </a>
+        
         <a href="{% url 'empleados' %}" class="sidebar-link">
             <span class="sidebar-link-icon"><i class="fa-solid fa-users"></i></span>
             Empleados
@@ -638,7 +845,7 @@
     </nav>
 
     <div class="sidebar-logout">
-        <a href="{% url 'cerrar_sesion' %}" class="sidebar-link" style="animation:none;opacity:1;transform:none;">
+        <a href="{% url 'cerrar_sesion' %}" class="sidebar-link" style="animation: none; opacity: 1; transform: none;">
             <span class="sidebar-link-icon"><i class="fa-solid fa-sign-out-alt"></i></span>
             Cerrar Sesión
         </a>
@@ -653,16 +860,6 @@
     </div>
 </aside>
 
-<!-- ===== DATALIST GLOBAL DE CIUDADES =====
-     Se declara UNA sola vez fuera de la tabla.
-     Todos los inputs con list="ciudades-list" lo comparten. -->
-<datalist id="ciudades-list">
-    {% for ciudad in ciudades %}
-    <option value="{{ ciudad }}">{{ ciudad }}</option>
-    {% endfor %}
-</datalist>
-
-<!-- ===== CONTENIDO PRINCIPAL ===== -->
 <div class="main-content">
 
     <header class="topbar">
@@ -707,7 +904,6 @@
 
         <div class="card">
 
-            <!-- Filtros -->
             <form method="GET" id="filtro-mes" class="filtro-bar">
                 <div class="form-group">
                     <label for="mes"><i class="fa-regular fa-calendar"></i> Mes de ingreso</label>
@@ -716,9 +912,7 @@
                 <div class="search-wrapper">
                     <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
                     <input type="text" id="buscador" placeholder="Buscar por nombre o documento…" autocomplete="off">
-                    <button class="search-clear" id="btn-clear" type="button" title="Limpiar">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
+                    <button class="search-clear" id="btn-clear" type="button" title="Limpiar"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </form>
 
@@ -740,28 +934,33 @@
                         <table id="tabla-empleados">
                             <thead>
                                 <tr>
-                                    <th><i class="fa-regular fa-square-check"></i></th>
-                                    <th>Nombre Completo</th>
-                                    <th>Tipo Doc.</th>
-                                    <th>Núm. Doc.</th>
-                                    <th>Grupo Sang.</th>
-                                    <th>Factor RH</th>
-                                    <th>Cargo (código)</th>
-                                    <th>Sábado Hábil</th>
-                                    <th>Ciudad Exp. Id.</th>
+                                    <th rowspan="2" style="width: 40px;"><i class="fa-regular fa-square-check"></i></th>
+                                    <th rowspan="2" style="width: 22%;">Nombre Completo</th>
+                                    <th rowspan="2" style="width: 9%;">Tipo Doc.</th>
+                                    <th rowspan="2" style="width: 14%;">Núm. Doc.</th>
+                                    <th colspan="5" style="text-align: center;">Datos Adicionales</th>
+                                </tr>
+                                <tr>
+                                    <th style="width: 10%;">Grupo Sang.</th>
+                                    <th style="width: 8%;">Factor RH</th>
+                                    <th style="width: 12%;">Cargo (código)</th>
+                                    <th style="width: 13%;">Sábado Hábil</th>
+                                    <th style="width: 12%;">Ciudad Exp. Id.</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for emp in empleados %}
-                                <tr data-nombre="{{ emp.nombre_1 }} {{ emp.primer_apellido }}" data-doc="{{ emp.documento }}">
-                                    <td>
+                                <tr class="fila-principal" data-nombre="{{ emp.nombre_1 }} {{ emp.primer_apellido }}" data-doc="{{ emp.documento }}">
+                                    <td style="vertical-align: middle;">
                                         <input type="checkbox" name="empleados" value="{{ emp.id_empleado }}" class="check-empleado">
                                     </td>
-                                    <td>{{ emp.nombre_1 }} {{ emp.nombre_2 }} {{ emp.primer_apellido }} {{ emp.segundo_apellido }}</td>
-                                    <td>{{ emp.tipo_doc }}</td>
-                                    <td>{{ emp.documento }}</td>
+                                    <td style="vertical-align: middle;">{{ emp.nombre_1 }} {{ emp.nombre_2 }} {{ emp.primer_apellido }} {{ emp.segundo_apellido }}</td>
+                                    <td style="vertical-align: middle;">{{ emp.tipo_doc }}</td>
+                                    <td style="vertical-align: middle;">{{ emp.documento }}</td>
+                                </tr>
+                                <tr class="fila-editable">
                                     <td>
-                                        <select name="grupo_sanguineo_{{ emp.id_empleado }}" style="width:90px;">
+                                        <select name="grupo_sanguineo_{{ emp.id_empleado }}" style="width:100%;">
                                             <option value="">—</option>
                                             {% for g in grupos_sanguineos %}
                                             <option value="{{ g }}" {% if emp.grupo_sanguineo == g %}selected{% endif %}>{{ g }}</option>
@@ -769,59 +968,29 @@
                                         </select>
                                     </td>
                                     <td>
-                                        <select name="factor_rh_{{ emp.id_empleado }}" style="width:65px;">
+                                        <select name="factor_rh_{{ emp.id_empleado }}" style="width:100%;">
                                             <option value="">—</option>
                                             <option value="+" {% if emp.factor_rh == '+' %}selected{% endif %}>+</option>
                                             <option value="-" {% if emp.factor_rh == '-' %}selected{% endif %}>-</option>
                                         </select>
                                     </td>
                                     <td>
-                                        <input type="text"
-                                               name="cargo_{{ emp.id_empleado }}"
-                                               value="{{ emp.cargo|default:'' }}"
-                                               style="width:130px;text-transform:uppercase;">
+                                        <input type="text" name="cargo_{{ emp.id_empleado }}" value="{{ emp.cargo|default:'' }}" style="width:100%;text-transform:uppercase;">
                                     </td>
                                     <td>
-                                        <select name="sabado_habil_{{ emp.id_empleado }}" style="width:130px;">
+                                        <select name="sabado_habil_{{ emp.id_empleado }}" style="width:100%;">
                                             {% for val, label in sabados_habiles %}
                                             <option value="{{ val }}">{{ label }}</option>
                                             {% endfor %}
                                         </select>
                                     </td>
-
-                                    {# ── CIUDAD: input + datalist nativo (sin Tom Select) ── #}
                                     <td>
-                                        {#
-                                            Por qué este enfoque:
-                                            - El <datalist> nativo renderiza el autocompletado fuera del DOM
-                                              de la página (lo gestiona el SO/navegador), por lo que nunca
-                                              dispara scroll en el contenedor.
-                                            - El input visible guarda el texto legible para el usuario.
-                                            - El hidden guarda el valor (texto de ciudad) que llega al POST,
-                                              igual que antes con ciudad_exp_id_<id>.
-                                            - El JS sincroniza ambos al escribir/seleccionar.
-                                        #}
-                                        <input
-                                            type="text"
-                                            class="ciudad-input"
-                                            list="ciudades-list"
-                                            placeholder="Escribe para buscar…"
-                                            autocomplete="off"
-                                            data-emp-id="{{ emp.id_empleado }}"
-                                        >
-                                        {#
-                                            Nota para el backend: el campo que llega en POST sigue siendo
-                                            ciudad_exp_id_<id>, pero ahora contiene el string de ciudad
-                                            (igual que antes usabas ciudad_str = str(ciudad_obj)).
-                                            Si necesitas el ID numérico, añade un segundo hidden y
-                                            mapea en JS usando el data-id del datalist.
-                                        #}
-                                        <input
-                                            type="hidden"
-                                            name="ciudad_exp_id_{{ emp.id_empleado }}"
-                                            class="ciudad-hidden"
-                                            value=""
-                                        >
+                                        <select name="ciudad_exp_id_{{ emp.id_empleado }}" class="ciudad-select" style="width:100%;">
+                                            <option value="">Selecciona o escribe...</option>
+                                            {% for ciudad in ciudades %}
+                                            <option value="{{ ciudad.id }}">{{ ciudad }}</option>
+                                            {% endfor %}
+                                        </select>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -848,107 +1017,134 @@
     </main>
 </div>
 
-<!-- Scripts: solo Bootstrap y jQuery. Tom Select eliminado. -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
 
-    // =====================================================
-    // 1. SINCRONIZACIÓN CIUDAD input ↔ hidden
-    //
-    //    Cuando el usuario escribe o selecciona una opción
-    //    del datalist, copiamos el valor al input hidden
-    //    que lleva el nombre que espera el backend.
-    //
-    //    El datalist nativo no causa scroll porque el
-    //    navegador gestiona su propio popup nativo fuera
-    //    del DOM de la página.
-    // =====================================================
-    document.querySelectorAll('.ciudad-input').forEach(function (input) {
-        var hidden = input.nextElementSibling; // el input[type=hidden] que le sigue
+        const scrollContainer = document.getElementById('table-scroll-container');
 
-        input.addEventListener('input', function () {
-            hidden.value = input.value;
+        document.querySelectorAll('.ciudad-select').forEach(function(sel) {
+            if (sel.tomselect) return;
+
+            let savedScrollTop = 0;
+            let savedScrollLeft = 0;
+
+            let ts = new TomSelect(sel, {
+                create: false,
+                sortField: { field: 'text', direction: 'asc' },
+                placeholder: 'Selecciona o escribe...',
+                dropdownParent: 'body',
+                render: {
+                    no_results: function() {
+                        return '<div class="no-results">No se encontraron resultados</div>';
+                    }
+                },
+                onItemAdd: function() {
+                    this.blur();
+                },
+                onFocus: function() {
+                    savedScrollTop = scrollContainer.scrollTop;
+                    savedScrollLeft = scrollContainer.scrollLeft;
+                },
+                onDropdownOpen: function() {
+                    if (savedScrollTop !== null) {
+                        scrollContainer.scrollTop = savedScrollTop;
+                        scrollContainer.scrollLeft = savedScrollLeft;
+                    }
+                    requestAnimationFrame(() => {
+                        if (savedScrollTop !== null) {
+                            scrollContainer.scrollTop = savedScrollTop;
+                            scrollContainer.scrollLeft = savedScrollLeft;
+                        }
+                    });
+                },
+                onDropdownClose: function() {
+                    if (savedScrollTop !== null) {
+                        scrollContainer.scrollTop = savedScrollTop;
+                        scrollContainer.scrollLeft = savedScrollLeft;
+                    }
+                    setTimeout(() => { savedScrollTop = null; savedScrollLeft = null; }, 100);
+                }
+            });
         });
 
-        // Cuando el foco sale (blur) también sincronizamos,
-        // por si el usuario eligió con teclado.
-        input.addEventListener('change', function () {
-            hidden.value = input.value;
+        document.getElementById('form-generar')?.addEventListener('submit', function(e) {
+            const checks = document.querySelectorAll('.check-empleado:checked');
+            const container = document.getElementById('validation-message-container');
+
+            container.innerHTML = '';
+
+            if (checks.length === 0) {
+                e.preventDefault();
+
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert-validation';
+                alertDiv.innerHTML = `
+                    <i class="fa-solid fa-xmark"></i>
+                    Debes seleccionar al menos un empleado para generar la ficha.
+                `;
+                container.appendChild(alertDiv);
+
+                container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                setTimeout(() => {
+                    if (alertDiv.parentNode === container) {
+                        container.removeChild(alertDiv);
+                    }
+                }, 5000);
+            }
+        });
+
+        document.getElementById('seleccionar-todos')?.addEventListener('change', function(e) {
+            const checked = e.target.checked;
+            document.querySelectorAll('.check-empleado').forEach(function(cb) {
+                const row = cb.closest('tr');
+                if (row && row.style.display !== 'none') {
+                    cb.checked = checked;
+                }
+            });
+        });
+
+        const buscador = document.getElementById('buscador');
+        const btnClear = document.getElementById('btn-clear');
+
+        buscador?.addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase().trim();
+            btnClear.classList.toggle('visible', term.length > 0);
+
+            document.querySelectorAll('#tabla-empleados tbody tr.fila-principal').forEach(filaPrincipal => {
+                const nombre = (filaPrincipal.getAttribute('data-nombre') || '').toLowerCase();
+                const doc = (filaPrincipal.getAttribute('data-doc') || '').toLowerCase();
+                const visible = nombre.includes(term) || doc.includes(term);
+                filaPrincipal.style.display = visible ? '' : 'none';
+                
+                const filaEditable = filaPrincipal.nextElementSibling;
+                if (filaEditable && filaEditable.classList.contains('fila-editable')) {
+                    filaEditable.style.display = visible ? '' : 'none';
+                }
+            });
+        });
+
+        btnClear?.addEventListener('click', function() {
+            buscador.value = '';
+            buscador.dispatchEvent(new Event('input'));
+            buscador.focus();
+        });
+
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const r = document.createElement('span');
+                r.className = 'sb-ripple';
+                r.style.left = '18px';
+                r.style.top = '50%';
+                this.appendChild(r);
+                setTimeout(() => r.remove(), 520);
+            });
         });
     });
-
-    // =====================================================
-    // 2. VALIDACIÓN AL ENVIAR
-    // =====================================================
-    document.getElementById('form-generar')?.addEventListener('submit', function (e) {
-        var checks = document.querySelectorAll('.check-empleado:checked');
-        var container = document.getElementById('validation-message-container');
-        container.innerHTML = '';
-
-        if (checks.length === 0) {
-            e.preventDefault();
-            var alertDiv = document.createElement('div');
-            alertDiv.className = 'alert-validation';
-            alertDiv.innerHTML = '<i class="fa-solid fa-xmark"></i> Debes seleccionar al menos un empleado para generar la ficha.';
-            container.appendChild(alertDiv);
-            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(function () {
-                if (alertDiv.parentNode === container) container.removeChild(alertDiv);
-            }, 5000);
-        }
-    });
-
-    // =====================================================
-    // 3. SELECCIONAR TODOS LOS VISIBLES
-    // =====================================================
-    document.getElementById('seleccionar-todos')?.addEventListener('change', function (e) {
-        var checked = e.target.checked;
-        document.querySelectorAll('.check-empleado').forEach(function (cb) {
-            var row = cb.closest('tr');
-            if (row && row.style.display !== 'none') cb.checked = checked;
-        });
-    });
-
-    // =====================================================
-    // 4. BÚSQUEDA EN LA TABLA
-    // =====================================================
-    var buscador = document.getElementById('buscador');
-    var btnClear = document.getElementById('btn-clear');
-
-    buscador?.addEventListener('input', function (e) {
-        var term = e.target.value.toLowerCase().trim();
-        btnClear.classList.toggle('visible', term.length > 0);
-        document.querySelectorAll('#tabla-empleados tbody tr').forEach(function (fila) {
-            var nombre = (fila.getAttribute('data-nombre') || '').toLowerCase();
-            var doc    = (fila.getAttribute('data-doc')    || '').toLowerCase();
-            fila.style.display = (nombre.includes(term) || doc.includes(term)) ? '' : 'none';
-        });
-    });
-
-    btnClear?.addEventListener('click', function () {
-        buscador.value = '';
-        buscador.dispatchEvent(new Event('input'));
-        buscador.focus();
-    });
-
-    // =====================================================
-    // 5. RIPPLE EN SIDEBAR
-    // =====================================================
-    document.querySelectorAll('.sidebar-link').forEach(function (link) {
-        link.addEventListener('click', function () {
-            var r = document.createElement('span');
-            r.className = 'sb-ripple';
-            r.style.left = '18px';
-            r.style.top  = '50%';
-            this.appendChild(r);
-            setTimeout(function () { r.remove(); }, 520);
-        });
-    });
-
-});
 </script>
 </body>
 </html>
