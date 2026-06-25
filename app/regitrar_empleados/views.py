@@ -456,11 +456,9 @@ def crear_subcliente_ajax(request):
         return JsonResponse({'ok': True, 'id': sub.id, 'text': str(sub)})
     return JsonResponse({'ok': False, 'errors': form.errors}, status=400)
 
-
-# VIEW CORREO
+# ENVIAR CORREO A EMPLEADO
 @login_requerido
 def enviar_correo(request):
-    # Si es GET, redirigir a empleados (ya no hay template propio)
     if request.method != "POST":
         return redirect('empleados')
 
@@ -471,11 +469,15 @@ def enviar_correo(request):
     asunto = request.POST.get("asunto", "").strip()
     cuerpo_html = request.POST.get("cuerpo_html", "").strip()
 
+    # Reemplazo seguro de {nombre} en el servidor
+    nombre_completo = f"{empleado.nombre_1} {empleado.primer_apellido}".strip()
+    asunto = asunto.replace("{nombre}", nombre_completo)
+    cuerpo_html = cuerpo_html.replace("{nombre}", nombre_completo)
+
     if not asunto or not cuerpo_html:
         messages.error(request, "El asunto y el cuerpo del correo son obligatorios.")
         return redirect('empleados')
 
-    # Adjuntos (igual que antes)
     lista_adjuntos = []
     archivos = request.FILES.getlist("adjuntos")
     for archivo in archivos:

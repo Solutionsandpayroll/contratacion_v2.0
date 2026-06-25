@@ -716,21 +716,15 @@
 </style>
 
 <script>
-/* ══════════════════════════════════════
-   CUSTOM EDITOR — sin Summernote
-══════════════════════════════════════ */
 (function() {
   const editable = document.getElementById('ce-editable');
   const textarea = document.getElementById('cuerpo_html');
   if (!editable || !textarea) return;
 
-  // Sincronizar editable → textarea ANTES de que el browser valide
-  // Usamos 'submit' con capture:true para ejecutar antes de la validación nativa
   document.getElementById('form-correo').addEventListener('submit', function(e) {
     const html = editable.innerHTML.trim();
     textarea.value = html;
 
-    // Validación: editor vacío
     if (!html || html === '<br>' || html === '<p><br></p>') {
       e.preventDefault();
       editable.focus();
@@ -743,8 +737,6 @@
       return false;
     }
 
-    // ── Estado ENVIANDO ──
-    // 1. Botón: spinner + texto cambiado
     const btn      = document.getElementById('btn-enviar-correo');
     const spinner  = document.getElementById('correo-spinner');
     const icon     = document.getElementById('correo-send-icon');
@@ -754,17 +746,14 @@
     if (icon)    icon.style.display    = 'none';
     if (label)   label.textContent     = 'Enviando…';
 
-    // 2. Overlay central
     const overlay = document.getElementById('correo-sending-overlay');
     if (overlay) overlay.style.display = 'flex';
 
-    // Deshabilitar cancelar mientras envía
     const cancelBtn = document.querySelector('#modalEnviarCorreo .correo-btn--cancel');
     if (cancelBtn) cancelBtn.disabled = true;
 
   }, true);
 
-  // Botones de toolbar
   document.querySelectorAll('.ce-btn[data-cmd]').forEach(btn => {
     btn.addEventListener('mousedown', e => {
       e.preventDefault();
@@ -774,7 +763,6 @@
     });
   });
 
-  // Botón de enlace
   const linkBtn = document.getElementById('ce-link-btn');
   if (linkBtn) {
     linkBtn.addEventListener('mousedown', e => {
@@ -785,7 +773,6 @@
     });
   }
 
-  // Marcar botones activos según selección
   function updateActiveStates() {
     ['bold','italic','underline','strikeThrough'].forEach(cmd => {
       const btn = document.querySelector(`.ce-btn[data-cmd="${cmd}"]`);
@@ -795,13 +782,11 @@
   editable.addEventListener('keyup', updateActiveStates);
   editable.addEventListener('mouseup', updateActiveStates);
   editable.addEventListener('selectionchange', updateActiveStates);
-  // Limpiar error visual al escribir
   editable.addEventListener('input', () => {
     const wrap = editable.closest('.ce-editor-wrap');
     if (wrap) { wrap.style.borderColor = ''; wrap.style.boxShadow = ''; }
   });
 
-  // API pública para cargar HTML en el editor (reemplaza summernote('code', html))
   window.ceSetContent = function(html) {
     if (editable) editable.innerHTML = html || '';
   };
@@ -810,9 +795,6 @@
   };
 })();
 
-/* ══════════════════════════════════════
-   MODAL CORREO — apertura y plantillas
-══════════════════════════════════════ */
 const plantillas = {
   "1": {
     asunto: "Solicitud documentación proceso de Vinculación - {nombre}",
@@ -846,10 +828,8 @@ function abrirModalCorreo(idEmpleado, nombreCompleto, email) {
   document.getElementById('correo-nombre').value = nombreCompleto || '';
   document.getElementById('correo-email').value = email || '';
 
-  // Resetear adjuntos
   if (typeof selectedFiles !== 'undefined') { selectedFiles = []; updateFileInputAndList(); }
 
-  // Cargar plantilla 1 por defecto
   document.getElementById('estructura').value = '1';
   cargarPlantillaCorreo('1', nombreCompleto);
 
@@ -860,7 +840,6 @@ document.getElementById('estructura').addEventListener('change', function() {
   cargarPlantillaCorreo(this.value, document.getElementById('correo-nombre').value);
 });
 
-/* Adjuntos */
 const dropZone   = document.getElementById('dropZone');
 const fileInput  = document.getElementById('adjuntos');
 const fileList   = document.getElementById('fileList');
