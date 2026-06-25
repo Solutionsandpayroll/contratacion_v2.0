@@ -16,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;0,6..12,800;0,6..12,900;1,6..12,400&display=swap" rel="stylesheet">
 
     <style>
+        /* ===== ESTILOS HEREDADOS DEL CÓDIGO 1 ===== */
         :root {
             --azul-oscuro:  #162b47;
             --azul-medio:   #105788;
@@ -77,6 +78,7 @@
             line-height: 1;
         }
 
+        /* ── SIDEBAR ── */
         .sidebar {
             width: var(--sidebar-w);
             height: 100vh;
@@ -244,6 +246,7 @@
             to { transform: scale(32); opacity: 0; }
         }
 
+        /* ── BLOQUE DE CIERRE DE SESIÓN (agregado) ── */
         .sidebar-logout {
             padding: 6px 10px 4px;
             border-top: 1px solid rgba(255,255,255,.06);
@@ -546,15 +549,15 @@
             overflow-x: auto;
             overflow-y: auto;
             flex: 1;
-            overflow-anchor: none;
+            overflow-anchor: none; /* Añadido para evitar scroll-anchoring de Chrome */
         }
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: .77rem;
-            table-layout: fixed;
+            white-space: nowrap;
+            min-width: 1100px;
         }
-
         thead {
             background: #f5f7fa;
             border-bottom: 2px solid var(--color-border);
@@ -563,7 +566,7 @@
             z-index: 2;
         }
         th {
-            padding: 8px 6px;
+            padding: 11px 10px;
             text-align: center;
             font-size: .62rem;
             font-weight: 800;
@@ -572,16 +575,16 @@
             letter-spacing: .7px;
             background: #f5f7fa;
         }
-        th:first-child { text-align: center; width: 40px; }
+        th:first-child { text-align: center; width: 50px; }
+        th:nth-child(2) { text-align: left; }
         td {
-            padding: 6px 6px;
+            padding: 9px 10px;
             border-bottom: 1px solid #eef1f5;
             color: var(--text-secondary);
             text-align: center;
             vertical-align: middle;
         }
         td:nth-child(2) { text-align: left; font-weight: 700; color: var(--azul-oscuro); }
-        
         tbody tr {
             opacity: 0;
             animation: rowIn .45s ease forwards;
@@ -591,21 +594,15 @@
             from { opacity: 0; transform: translateY(12px); }
             to   { opacity: 1; transform: translateY(0); }
         }
-
-        /* Estilos para el agrupamiento de 2 filas por empleado */
-        tr.fila-principal td { border-bottom: none !important; }
-        tr.fila-editable td { border-top: none; }
-        tr.fila-editable { border-bottom: 1px solid #eef1f5; }
         tbody tr:hover td { background: #f0f5fb; }
 
-        /* Estilos para los inputs y selects de la segunda fila */
         td input[type="text"],
         td select {
-            padding: 6px 4px;
+            padding: 7px 10px;
             border: 1.5px solid var(--color-border);
             border-radius: var(--radius-sm);
             font-family: 'Nunito Sans', sans-serif;
-            font-size: .75rem;
+            font-size: .8rem;
             font-weight: 600;
             background: #f9fbfd;
             color: var(--azul-oscuro);
@@ -626,8 +623,8 @@
             -moz-appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
             background-repeat: no-repeat;
-            background-position: right 8px center;
-            padding-right: 28px;
+            background-position: right 10px center;
+            padding-right: 32px;
             cursor: pointer;
         }
         td input[type="checkbox"] {
@@ -654,6 +651,7 @@
             gap: 10px;
         }
 
+        /* Tom Select personalizado (igual que en Código 1) */
         .ts-wrapper .ts-dropdown {
             border: 1px solid #d4dae2 !important;
             border-radius: 10px !important;
@@ -714,9 +712,9 @@
         }
 
         .ts-wrapper.single .ts-control {
-            height: 34px !important;
-            min-height: 34px !important;
-            max-height: 34px !important;
+            height: 38px !important;
+            min-height: 38px !important;
+            max-height: 38px !important;
             flex-wrap: nowrap !important;
             overflow: hidden !important;
             display: flex !important;
@@ -724,17 +722,17 @@
             background: #f9fbfd !important;
             border: 1.5px solid #e0e5ea !important;
             border-radius: 8px !important;
-            padding: 0 32px 0 8px !important;
+            padding: 0 36px 0 14px !important;
             font-family: 'Nunito Sans', sans-serif !important;
             font-weight: 600 !important;
-            font-size: 0.75rem !important;
+            font-size: 0.82rem !important;
             color: var(--azul-oscuro) !important;
             box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
             cursor: pointer !important;
             position: relative !important;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='%23162b47'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") !important;
             background-repeat: no-repeat !important;
-            background-position: right 12px center !important;
+            background-position: right 14px center !important;
         }
         .ts-wrapper.single.focus .ts-control,
         .ts-wrapper.single .ts-control:focus-within {
@@ -751,7 +749,7 @@
             overflow: hidden !important;
             text-overflow: ellipsis !important;
             display: block !important;
-            line-height: 34px !important;
+            line-height: 38px !important;
         }
         .ts-wrapper.single .ts-control input {
             position: absolute !important;
@@ -777,7 +775,7 @@
             flex: 1 1 100% !important;
             font-family: 'Nunito Sans', sans-serif !important;
             font-weight: 600 !important;
-            font-size: 0.75rem !important;
+            font-size: 0.82rem !important;
             color: var(--azul-oscuro) !important;
             background: transparent !important;
             border: none !important;
@@ -785,6 +783,7 @@
             padding: 0 !important;
         }
 
+        /* Alerta de error personalizada (para validación) */
         .alert-validation {
             background: var(--rojo-10);
             color: #7a0020;
@@ -818,6 +817,7 @@
 </head>
 <body>
 
+<!-- ===== SIDEBAR ===== -->
 <aside class="sidebar">
     <div class="sidebar-logo">
         <img src="{% static 'img/logo_biocore_blanco.png' %}" alt="Logo empresa" class="sidebar-logo-img">
@@ -844,6 +844,7 @@
         </a>
     </nav>
 
+    <!-- Cierre de sesión justo encima del footer -->
     <div class="sidebar-logout">
         <a href="{% url 'cerrar_sesion' %}" class="sidebar-link" style="animation: none; opacity: 1; transform: none;">
             <span class="sidebar-link-icon"><i class="fa-solid fa-sign-out-alt"></i></span>
@@ -860,8 +861,10 @@
     </div>
 </aside>
 
+<!-- ===== CONTENIDO PRINCIPAL ===== -->
 <div class="main-content">
 
+    <!-- TOPBAR -->
     <header class="topbar">
         <div class="topbar-inner">
             <div class="breadcrumb-trail">
@@ -876,8 +879,10 @@
         </div>
     </header>
 
+    <!-- MAIN -->
     <main class="main">
 
+        <!-- Mensajes del servidor -->
         {% if messages %}
         <div class="messages">
             {% for message in messages %}
@@ -893,6 +898,7 @@
         </div>
         {% endif %}
 
+        <!-- Toolbar -->
         <div class="toolbar">
             <div class="toolbar-title">
                 <div class="toolbar-title-icon"><i class="fa-solid fa-file-lines"></i></div>
@@ -902,8 +908,10 @@
             <div style="flex:1"></div>
         </div>
 
+        <!-- Tarjeta principal -->
         <div class="card">
 
+            <!-- Filtros -->
             <form method="GET" id="filtro-mes" class="filtro-bar">
                 <div class="form-group">
                     <label for="mes"><i class="fa-regular fa-calendar"></i> Mes de ingreso</label>
@@ -916,6 +924,7 @@
                 </div>
             </form>
 
+            <!-- Contenedor para mensajes de validación (se mostrará aquí si no hay selección) -->
             <div id="validation-message-container"></div>
 
             {% if empleados %}
@@ -934,33 +943,28 @@
                         <table id="tabla-empleados">
                             <thead>
                                 <tr>
-                                    <th rowspan="2" style="width: 40px;"><i class="fa-regular fa-square-check"></i></th>
-                                    <th rowspan="2" style="width: 22%;">Nombre Completo</th>
-                                    <th rowspan="2" style="width: 9%;">Tipo Doc.</th>
-                                    <th rowspan="2" style="width: 14%;">Núm. Doc.</th>
-                                    <th colspan="5" style="text-align: center;">Datos Adicionales</th>
-                                </tr>
-                                <tr>
-                                    <th style="width: 10%;">Grupo Sang.</th>
-                                    <th style="width: 8%;">Factor RH</th>
-                                    <th style="width: 12%;">Cargo (código)</th>
-                                    <th style="width: 13%;">Sábado Hábil</th>
-                                    <th style="width: 12%;">Ciudad Exp. Id.</th>
+                                    <th><i class="fa-regular fa-square-check"></i></th>
+                                    <th>Nombre Completo</th>
+                                    <th>Tipo Doc.</th>
+                                    <th>Núm. Doc.</th>
+                                    <th>Grupo Sang.</th>
+                                    <th>Factor RH</th>
+                                    <th>Cargo (código)</th>
+                                    <th>Sábado Hábil</th>
+                                    <th>Ciudad Exp. Id.</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for emp in empleados %}
-                                <tr class="fila-principal" data-nombre="{{ emp.nombre_1 }} {{ emp.primer_apellido }}" data-doc="{{ emp.documento }}">
-                                    <td style="vertical-align: middle;">
+                                <tr data-nombre="{{ emp.nombre_1 }} {{ emp.primer_apellido }}" data-doc="{{ emp.documento }}">
+                                    <td>
                                         <input type="checkbox" name="empleados" value="{{ emp.id_empleado }}" class="check-empleado">
                                     </td>
-                                    <td style="vertical-align: middle;">{{ emp.nombre_1 }} {{ emp.nombre_2 }} {{ emp.primer_apellido }} {{ emp.segundo_apellido }}</td>
-                                    <td style="vertical-align: middle;">{{ emp.tipo_doc }}</td>
-                                    <td style="vertical-align: middle;">{{ emp.documento }}</td>
-                                </tr>
-                                <tr class="fila-editable">
+                                    <td>{{ emp.nombre_1 }} {{ emp.nombre_2 }} {{ emp.primer_apellido }} {{ emp.segundo_apellido }}</td>
+                                    <td>{{ emp.tipo_doc }}</td>
+                                    <td>{{ emp.documento }}</td>
                                     <td>
-                                        <select name="grupo_sanguineo_{{ emp.id_empleado }}" style="width:100%;">
+                                        <select name="grupo_sanguineo_{{ emp.id_empleado }}" style="width:90px;">
                                             <option value="">—</option>
                                             {% for g in grupos_sanguineos %}
                                             <option value="{{ g }}" {% if emp.grupo_sanguineo == g %}selected{% endif %}>{{ g }}</option>
@@ -968,24 +972,24 @@
                                         </select>
                                     </td>
                                     <td>
-                                        <select name="factor_rh_{{ emp.id_empleado }}" style="width:100%;">
+                                        <select name="factor_rh_{{ emp.id_empleado }}" style="width:65px;">
                                             <option value="">—</option>
                                             <option value="+" {% if emp.factor_rh == '+' %}selected{% endif %}>+</option>
                                             <option value="-" {% if emp.factor_rh == '-' %}selected{% endif %}>-</option>
                                         </select>
                                     </td>
                                     <td>
-                                        <input type="text" name="cargo_{{ emp.id_empleado }}" value="{{ emp.cargo|default:'' }}" style="width:100%;text-transform:uppercase;">
+                                        <input type="text" name="cargo_{{ emp.id_empleado }}" value="{{ emp.cargo|default:'' }}" style="width:130px;text-transform:uppercase;">
                                     </td>
                                     <td>
-                                        <select name="sabado_habil_{{ emp.id_empleado }}" style="width:100%;">
+                                        <select name="sabado_habil_{{ emp.id_empleado }}" style="width:130px;">
                                             {% for val, label in sabados_habiles %}
                                             <option value="{{ val }}">{{ label }}</option>
                                             {% endfor %}
                                         </select>
                                     </td>
                                     <td>
-                                        <select name="ciudad_exp_id_{{ emp.id_empleado }}" class="ciudad-select" style="width:100%;">
+                                        <select name="ciudad_exp_id_{{ emp.id_empleado }}" class="ciudad-select" style="width:260px;">
                                             <option value="">Selecciona o escribe...</option>
                                             {% for ciudad in ciudades %}
                                             <option value="{{ ciudad.id }}">{{ ciudad }}</option>
@@ -1013,24 +1017,38 @@
             </div>
             {% endif %}
 
-        </div>
+        </div> <!-- /card -->
     </main>
 </div>
 
+<!-- ===== SCRIPTS ===== -->
+<!-- jQuery (necesario para Tom Select) -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Tom Select JS -->
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-
+        // ==========================================
+        // 1. CORRECCIÓN DE TOM SELECT (Evita el salto al inicio de la tabla)
+        // ==========================================
         const scrollContainer = document.getElementById('table-scroll-container');
 
         document.querySelectorAll('.ciudad-select').forEach(function(sel) {
             if (sel.tomselect) return;
 
-            let savedScrollTop = 0;
-            let savedScrollLeft = 0;
+            let savedScrollTop = null;
+            let savedScrollLeft = null;
+            let lockScroll = false;
+
+            function onScrollAttempt(e) {
+                if (lockScroll) {
+                    scrollContainer.scrollTop = savedScrollTop;
+                    scrollContainer.scrollLeft = savedScrollLeft;
+                }
+            }
 
             let ts = new TomSelect(sel, {
                 create: false,
@@ -1048,29 +1066,43 @@
                 onFocus: function() {
                     savedScrollTop = scrollContainer.scrollTop;
                     savedScrollLeft = scrollContainer.scrollLeft;
+                    lockScroll = true;
+                    scrollContainer.addEventListener('scroll', onScrollAttempt, { passive: false });
+
+                    [0, 16, 32, 48, 100].forEach(delay => {
+                        setTimeout(() => {
+                            if (savedScrollTop !== null) {
+                                scrollContainer.scrollTop = savedScrollTop;
+                                scrollContainer.scrollLeft = savedScrollLeft;
+                            }
+                        }, delay);
+                    });
                 },
                 onDropdownOpen: function() {
                     if (savedScrollTop !== null) {
                         scrollContainer.scrollTop = savedScrollTop;
                         scrollContainer.scrollLeft = savedScrollLeft;
                     }
-                    requestAnimationFrame(() => {
-                        if (savedScrollTop !== null) {
-                            scrollContainer.scrollTop = savedScrollTop;
-                            scrollContainer.scrollLeft = savedScrollLeft;
-                        }
-                    });
                 },
                 onDropdownClose: function() {
+                    lockScroll = false;
+                    scrollContainer.removeEventListener('scroll', onScrollAttempt);
                     if (savedScrollTop !== null) {
                         scrollContainer.scrollTop = savedScrollTop;
                         scrollContainer.scrollLeft = savedScrollLeft;
                     }
                     setTimeout(() => { savedScrollTop = null; savedScrollLeft = null; }, 100);
+                },
+                onBlur: function() {
+                    lockScroll = false;
+                    scrollContainer.removeEventListener('scroll', onScrollAttempt);
                 }
             });
         });
 
+        // ==========================================
+        // 2. VALIDACIÓN DEL FORMULARIO
+        // ==========================================
         document.getElementById('form-generar')?.addEventListener('submit', function(e) {
             const checks = document.querySelectorAll('.check-empleado:checked');
             const container = document.getElementById('validation-message-container');
@@ -1098,6 +1130,9 @@
             }
         });
 
+        // ==========================================
+        // 3. SELECCIONAR TODOS LOS VISIBLES
+        // ==========================================
         document.getElementById('seleccionar-todos')?.addEventListener('change', function(e) {
             const checked = e.target.checked;
             document.querySelectorAll('.check-empleado').forEach(function(cb) {
@@ -1108,6 +1143,9 @@
             });
         });
 
+        // ==========================================
+        // 4. BÚSQUEDA EN LA TABLA
+        // ==========================================
         const buscador = document.getElementById('buscador');
         const btnClear = document.getElementById('btn-clear');
 
@@ -1115,16 +1153,11 @@
             const term = e.target.value.toLowerCase().trim();
             btnClear.classList.toggle('visible', term.length > 0);
 
-            document.querySelectorAll('#tabla-empleados tbody tr.fila-principal').forEach(filaPrincipal => {
-                const nombre = (filaPrincipal.getAttribute('data-nombre') || '').toLowerCase();
-                const doc = (filaPrincipal.getAttribute('data-doc') || '').toLowerCase();
+            document.querySelectorAll('#tabla-empleados tbody tr').forEach(fila => {
+                const nombre = (fila.getAttribute('data-nombre') || '').toLowerCase();
+                const doc = (fila.getAttribute('data-doc') || '').toLowerCase();
                 const visible = nombre.includes(term) || doc.includes(term);
-                filaPrincipal.style.display = visible ? '' : 'none';
-                
-                const filaEditable = filaPrincipal.nextElementSibling;
-                if (filaEditable && filaEditable.classList.contains('fila-editable')) {
-                    filaEditable.style.display = visible ? '' : 'none';
-                }
+                fila.style.display = visible ? '' : 'none';
             });
         });
 
@@ -1134,6 +1167,9 @@
             buscador.focus();
         });
 
+        // ==========================================
+        // 5. EFECTO RIPPLE EN LOS LINKS DEL SIDEBAR
+        // ==========================================
         document.querySelectorAll('.sidebar-link').forEach(link => {
             link.addEventListener('click', function(e) {
                 const r = document.createElement('span');
