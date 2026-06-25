@@ -456,6 +456,7 @@ def crear_subcliente_ajax(request):
         return JsonResponse({'ok': True, 'id': sub.id, 'text': str(sub)})
     return JsonResponse({'ok': False, 'errors': form.errors}, status=400)
 
+
 # ENVIAR CORREO A EMPLEADO
 @login_requerido
 def enviar_correo(request):

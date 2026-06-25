@@ -549,6 +549,7 @@
             overflow-x: auto;
             overflow-y: auto;
             flex: 1;
+            overflow-anchor: none; /* Añadido para evitar scroll-anchoring de Chrome */
         }
         table {
             width: 100%;
@@ -1036,7 +1037,18 @@
         const scrollContainer = document.getElementById('table-scroll-container');
 
         document.querySelectorAll('.ciudad-select').forEach(function(sel) {
-            if (sel.tomselect) return; // Evita inicializar dos veces
+            if (sel.tomselect) return;
+
+            let savedScrollTop = null;
+            let savedScrollLeft = null;
+            let lockScroll = false;
+
+            function onScrollAttempt(e) {
+                if (lockScroll) {
+                    scrollContainer.scrollTop = savedScrollTop;
+                    scrollContainer.scrollLeft = savedScrollLeft;
+                }
+            }
 
             let ts = new TomSelect(sel, {
                 create: false,
@@ -1048,30 +1060,42 @@
                         return '<div class="no-results">No se encontraron resultados</div>';
                     }
                 },
-                // Al añadir un ítem, cierra el dropdown
                 onItemAdd: function() {
                     this.blur();
                 },
-                // 👇 NUEVO: Control del scroll para evitar saltos al inicio de la tabla
-                onDropdownOpen: function() {
-                    if (!scrollContainer) return;
-                    // Guardamos la posición exacta en el momento de abrir
-                    this._savedScrollTop = scrollContainer.scrollTop;
-                    // Obligamos al navegador a restaurar la posición en el siguiente frame
-                    requestAnimationFrame(() => {
-                        scrollContainer.scrollTop = this._savedScrollTop;
+                onFocus: function() {
+                    savedScrollTop = scrollContainer.scrollTop;
+                    savedScrollLeft = scrollContainer.scrollLeft;
+                    lockScroll = true;
+                    scrollContainer.addEventListener('scroll', onScrollAttempt, { passive: false });
+
+                    [0, 16, 32, 48, 100].forEach(delay => {
+                        setTimeout(() => {
+                            if (savedScrollTop !== null) {
+                                scrollContainer.scrollTop = savedScrollTop;
+                                scrollContainer.scrollLeft = savedScrollLeft;
+                            }
+                        }, delay);
                     });
                 },
+                onDropdownOpen: function() {
+                    if (savedScrollTop !== null) {
+                        scrollContainer.scrollTop = savedScrollTop;
+                        scrollContainer.scrollLeft = savedScrollLeft;
+                    }
+                },
                 onDropdownClose: function() {
-                    if (!scrollContainer || this._savedScrollTop === undefined) return;
-                    // Restauramos la posición al cerrar
-                    requestAnimationFrame(() => {
-                        scrollContainer.scrollTop = this._savedScrollTop;
-                    });
-                    // Limpiamos la variable guardada
-                    setTimeout(() => {
-                        this._savedScrollTop = undefined;
-                    }, 50);
+                    lockScroll = false;
+                    scrollContainer.removeEventListener('scroll', onScrollAttempt);
+                    if (savedScrollTop !== null) {
+                        scrollContainer.scrollTop = savedScrollTop;
+                        scrollContainer.scrollLeft = savedScrollLeft;
+                    }
+                    setTimeout(() => { savedScrollTop = null; savedScrollLeft = null; }, 100);
+                },
+                onBlur: function() {
+                    lockScroll = false;
+                    scrollContainer.removeEventListener('scroll', onScrollAttempt);
                 }
             });
         });
@@ -1083,7 +1107,6 @@
             const checks = document.querySelectorAll('.check-empleado:checked');
             const container = document.getElementById('validation-message-container');
 
-            // Eliminar mensajes de validación anteriores
             container.innerHTML = '';
 
             if (checks.length === 0) {
