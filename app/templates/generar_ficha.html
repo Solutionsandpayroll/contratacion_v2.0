@@ -1029,36 +1029,16 @@
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 
 <script>
-    // ═══════════════════════════════════════════
-    // MEJORA 1: Evitar que la tabla haga scroll al inicio al hacer clic en TomSelect
-    // ═══════════════════════════════════════════
-    (function() {
-        const scrollContainer = document.getElementById('table-scroll-container');
-        let savedScrollTop = 0;
-
-        scrollContainer.addEventListener('mousedown', function(e) {
-            const tsControl = e.target.closest('.ts-control');
-            if (tsControl) {
-                savedScrollTop = scrollContainer.scrollTop;
-            }
-        });
-
-        document.addEventListener('focusin', function(e) {
-            if (e.target.closest('.ts-wrapper') && scrollContainer) {
-                requestAnimationFrame(() => {
-                    scrollContainer.scrollTop = savedScrollTop;
-                });
-            }
-        });
-    })();
-
-    // ═══════════════════════════════════════════
-    // MEJORA 2: Inicializar TomSelect con cierre automático al seleccionar
-    // ═══════════════════════════════════════════
     document.addEventListener('DOMContentLoaded', function() {
+        // ==========================================
+        // 1. CORRECCIÓN DE TOM SELECT (Evita el salto al inicio de la tabla)
+        // ==========================================
+        const scrollContainer = document.getElementById('table-scroll-container');
+
         document.querySelectorAll('.ciudad-select').forEach(function(sel) {
-            if (sel.tomselect) return;
-            new TomSelect(sel, {
+            if (sel.tomselect) return; // Evita inicializar dos veces
+
+            let ts = new TomSelect(sel, {
                 create: false,
                 sortField: { field: 'text', direction: 'asc' },
                 placeholder: 'Selecciona o escribe...',
@@ -1068,85 +1048,114 @@
                         return '<div class="no-results">No se encontraron resultados</div>';
                     }
                 },
-                // Al añadir un item (hacer clic en una opción), fuerza el blur para mostrar el valor
+                // Al añadir un ítem, cierra el dropdown
                 onItemAdd: function() {
                     this.blur();
+                },
+                // 👇 NUEVO: Control del scroll para evitar saltos al inicio de la tabla
+                onDropdownOpen: function() {
+                    if (!scrollContainer) return;
+                    // Guardamos la posición exacta en el momento de abrir
+                    this._savedScrollTop = scrollContainer.scrollTop;
+                    // Obligamos al navegador a restaurar la posición en el siguiente frame
+                    requestAnimationFrame(() => {
+                        scrollContainer.scrollTop = this._savedScrollTop;
+                    });
+                },
+                onDropdownClose: function() {
+                    if (!scrollContainer || this._savedScrollTop === undefined) return;
+                    // Restauramos la posición al cerrar
+                    requestAnimationFrame(() => {
+                        scrollContainer.scrollTop = this._savedScrollTop;
+                    });
+                    // Limpiamos la variable guardada
+                    setTimeout(() => {
+                        this._savedScrollTop = undefined;
+                    }, 50);
                 }
             });
         });
-    });
 
-    // ---- VALIDACIÓN DEL FORMULARIO ----
-    document.getElementById('form-generar')?.addEventListener('submit', function(e) {
-        const checks = document.querySelectorAll('.check-empleado:checked');
-        const container = document.getElementById('validation-message-container');
+        // ==========================================
+        // 2. VALIDACIÓN DEL FORMULARIO
+        // ==========================================
+        document.getElementById('form-generar')?.addEventListener('submit', function(e) {
+            const checks = document.querySelectorAll('.check-empleado:checked');
+            const container = document.getElementById('validation-message-container');
 
-        // Eliminar mensajes de validación anteriores
-        container.innerHTML = '';
+            // Eliminar mensajes de validación anteriores
+            container.innerHTML = '';
 
-        if (checks.length === 0) {
-            e.preventDefault();
+            if (checks.length === 0) {
+                e.preventDefault();
 
-            const alertDiv = document.createElement('div');
-            alertDiv.className = 'alert-validation';
-            alertDiv.innerHTML = `
-                <i class="fa-solid fa-xmark"></i>
-                Debes seleccionar al menos un empleado para generar la ficha.
-            `;
-            container.appendChild(alertDiv);
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert-validation';
+                alertDiv.innerHTML = `
+                    <i class="fa-solid fa-xmark"></i>
+                    Debes seleccionar al menos un empleado para generar la ficha.
+                `;
+                container.appendChild(alertDiv);
 
-            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                container.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            setTimeout(() => {
-                if (alertDiv.parentNode === container) {
-                    container.removeChild(alertDiv);
-                }
-            }, 5000);
-        }
-    });
-
-    // Seleccionar todos los visibles
-    document.getElementById('seleccionar-todos')?.addEventListener('change', function(e) {
-        const checked = e.target.checked;
-        document.querySelectorAll('.check-empleado').forEach(function(cb) {
-            const row = cb.closest('tr');
-            if (row && row.style.display !== 'none') {
-                cb.checked = checked;
+                setTimeout(() => {
+                    if (alertDiv.parentNode === container) {
+                        container.removeChild(alertDiv);
+                    }
+                }, 5000);
             }
         });
-    });
 
-    // Búsqueda en tabla
-    const buscador = document.getElementById('buscador');
-    const btnClear = document.getElementById('btn-clear');
-
-    buscador?.addEventListener('input', function(e) {
-        const term = e.target.value.toLowerCase().trim();
-        btnClear.classList.toggle('visible', term.length > 0);
-
-        document.querySelectorAll('#tabla-empleados tbody tr').forEach(fila => {
-            const nombre = (fila.getAttribute('data-nombre') || '').toLowerCase();
-            const doc = (fila.getAttribute('data-doc') || '').toLowerCase();
-            const visible = nombre.includes(term) || doc.includes(term);
-            fila.style.display = visible ? '' : 'none';
+        // ==========================================
+        // 3. SELECCIONAR TODOS LOS VISIBLES
+        // ==========================================
+        document.getElementById('seleccionar-todos')?.addEventListener('change', function(e) {
+            const checked = e.target.checked;
+            document.querySelectorAll('.check-empleado').forEach(function(cb) {
+                const row = cb.closest('tr');
+                if (row && row.style.display !== 'none') {
+                    cb.checked = checked;
+                }
+            });
         });
-    });
 
-    btnClear?.addEventListener('click', function() {
-        buscador.value = '';
-        buscador.dispatchEvent(new Event('input'));
-        buscador.focus();
-    });
+        // ==========================================
+        // 4. BÚSQUEDA EN LA TABLA
+        // ==========================================
+        const buscador = document.getElementById('buscador');
+        const btnClear = document.getElementById('btn-clear');
 
-    // Ripple en sidebar links
-    document.querySelectorAll('.sidebar-link').forEach(link => {
-        link.addEventListener('click', function(e) {
-            const r = document.createElement('span');
-            r.className = 'sb-ripple';
-            r.style.left = '18px';
-            r.style.top = '50%';
-            this.appendChild(r);
-            setTimeout(() => r.remove(), 520);
+        buscador?.addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase().trim();
+            btnClear.classList.toggle('visible', term.length > 0);
+
+            document.querySelectorAll('#tabla-empleados tbody tr').forEach(fila => {
+                const nombre = (fila.getAttribute('data-nombre') || '').toLowerCase();
+                const doc = (fila.getAttribute('data-doc') || '').toLowerCase();
+                const visible = nombre.includes(term) || doc.includes(term);
+                fila.style.display = visible ? '' : 'none';
+            });
+        });
+
+        btnClear?.addEventListener('click', function() {
+            buscador.value = '';
+            buscador.dispatchEvent(new Event('input'));
+            buscador.focus();
+        });
+
+        // ==========================================
+        // 5. EFECTO RIPPLE EN LOS LINKS DEL SIDEBAR
+        // ==========================================
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const r = document.createElement('span');
+                r.className = 'sb-ripple';
+                r.style.left = '18px';
+                r.style.top = '50%';
+                this.appendChild(r);
+                setTimeout(() => r.remove(), 520);
+            });
         });
     });
 </script>
