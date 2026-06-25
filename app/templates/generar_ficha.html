@@ -566,6 +566,82 @@
             display: flex; justify-content: flex-end; gap: 10px;
         }
 
+        /* ============================================================
+               ESTILOS PARA EL AUTOCOMPLETADO PERSONALIZADO (MEJORADO)
+               ============================================================ */
+        .custom-autocomplete {
+            position: relative;
+            display: inline-block;
+            width: 260px;
+        }
+
+        .custom-autocomplete input[type="text"] {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1.5px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: .8rem;
+            font-weight: 600;
+            background: #f9fbfd;
+            color: var(--azul-oscuro);
+            transition: border-color .15s, box-shadow .15s;
+        }
+
+        .custom-autocomplete input[type="text"]:focus {
+            outline: none;
+            border-color: var(--azul-medio);
+            background: var(--blanco);
+            box-shadow: 0 0 0 2px rgba(16,87,136,.1);
+        }
+
+        /* ── PORTAL GLOBAL PARA LA LISTA (fuera de la tabla) ── */
+        .autocomplete-portal {
+            position: absolute;
+            z-index: 9999;
+            background: var(--blanco);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);                /* ✅ Bordes redondeados completos */
+            box-shadow: var(--shadow);
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            min-width: 220px;
+        }
+
+        .autocomplete-portal .option-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: .8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid #f0f3f6;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: background .15s, color .15s;
+        }
+
+        .autocomplete-portal .option-item:last-child {
+            border-bottom: none;
+        }
+
+        .autocomplete-portal .option-item:hover,
+        .autocomplete-portal .option-item.active {
+            background: var(--azul-oscuro) !important;
+            color: var(--blanco) !important;
+        }
+
+        .autocomplete-portal .no-results {
+            padding: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-align: center;
+        }
+
         @media (max-width: 768px) {
             .sidebar { width: 0; overflow: hidden; }
             .main-content { margin-left: 0; }
@@ -575,6 +651,7 @@
             .filtro-bar { flex-direction: column; align-items: stretch; }
             .search-wrapper { max-width: 100%; }
             .table-outer { max-height: 50vh; }
+            .custom-autocomplete { width: 100%; }
         }
     </style>
 </head>
@@ -748,14 +825,19 @@
                                         </select>
                                     </td>
 
-                                    {# ── CAMPO CIUDAD: select con opciones (tomado del Código 2) ── #}
+                                    {# ── CAMPO CIUDAD CON AUTOCOMPLETADO PERSONALIZADO ── #}
                                     <td>
-                                        <select name="ciudad_exp_id_{{ emp.id_empleado }}" style="width:260px;">
-                                            <option value="">Selecciona o escribe...</option>
-                                            {% for ciudad in ciudades %}
-                                            <option value="{{ ciudad.id }}">{{ ciudad }}</option>
-                                            {% endfor %}
-                                        </select>
+                                        <div class="custom-autocomplete" data-emp-id="{{ emp.id_empleado }}">
+                                            <input type="text"
+                                                   class="ciudad-input"
+                                                   placeholder="Escribe para buscar…"
+                                                   autocomplete="off">
+                                            {# La lista se genera ahora en el portal global #}
+                                            <input type="hidden"
+                                                   name="ciudad_exp_id_{{ emp.id_empleado }}"
+                                                   class="ciudad-hidden"
+                                                   value="">
+                                        </div>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -782,22 +864,155 @@
     </main>
 </div>
 
-<!-- Scripts: solo Bootstrap y jQuery (Tom Select no está incluido) -->
+<!-- PORTAL GLOBAL PARA LAS LISTAS DE AUTOCOMPLETADO (fuera de la tabla) -->
+<ul id="autocomplete-portal" class="autocomplete-portal"></ul>
+
+<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    // =====================================================
-    // 1. SINCRONIZACIÓN CIUDAD (ya no es necesaria porque usamos <select>)
-    //    El código que manipulaba .ciudad-input y .ciudad-hidden se mantiene
-    //    pero no afecta porque esos elementos ya no existen.
-    // =====================================================
+    // ============================================================
+    // 1. AUTOCOMPLETADO PERSONALIZADO PARA CIUDADES (PORTAL GLOBAL)
+    // ============================================================
+    var ciudadesData = [
+        {% for ciudad in ciudades %}
+        { id: {{ ciudad.id }}, label: "{{ ciudad }}" },
+        {% endfor %}
+    ];
 
-    // =====================================================
-    // 2. VALIDACIÓN AL ENVIAR
-    // =====================================================
+    var portal = document.getElementById('autocomplete-portal');
+    var activeAutocomplete = null;   // referencia al contenedor actualmente activo
+
+    // Función para ocultar el portal
+    function hidePortal() {
+        portal.style.display = 'none';
+        portal.innerHTML = '';
+        activeAutocomplete = null;
+    }
+
+    // Función para mostrar opciones en el portal
+    function showPortal(container, query) {
+        var input = container.querySelector('.ciudad-input');
+        var hidden = container.querySelector('.ciudad-hidden');
+        var rect = input.getBoundingClientRect();
+
+        // Posicionar el portal justo debajo del input
+        portal.style.top = (rect.bottom + window.scrollY) + 'px';
+        portal.style.left = (rect.left + window.scrollX) + 'px';
+        portal.style.minWidth = rect.width + 'px';
+
+        // Filtrar opciones
+        var q = query.toLowerCase().trim();
+        var filtered = ciudadesData.filter(function(item) {
+            return item.label.toLowerCase().includes(q);
+        });
+
+        // Construir lista
+        portal.innerHTML = '';
+        if (filtered.length === 0) {
+            var li = document.createElement('li');
+            li.className = 'no-results';
+            li.textContent = 'No se encontraron resultados';
+            portal.appendChild(li);
+        } else {
+            filtered.forEach(function(item) {
+                var li = document.createElement('li');
+                li.className = 'option-item';
+                li.textContent = item.label;
+                li.dataset.id = item.id;
+                li.addEventListener('mousedown', function(e) {
+                    // mousedown en lugar de click para que no interfiera con el blur del input
+                    e.preventDefault();
+                    selectOption(container, item.label, item.id);
+                });
+                portal.appendChild(li);
+            });
+        }
+
+        portal.style.display = 'block';
+        activeAutocomplete = container;
+    }
+
+    // Seleccionar una opción
+    function selectOption(container, label, id) {
+        var input = container.querySelector('.ciudad-input');
+        var hidden = container.querySelector('.ciudad-hidden');
+        input.value = label;
+        hidden.value = id;
+        hidePortal();
+        input.focus();  // mantener el foco en el input
+    }
+
+    // Asignar eventos a cada input de autocomplete
+    document.querySelectorAll('.custom-autocomplete').forEach(function(container) {
+        var input = container.querySelector('.ciudad-input');
+
+        input.addEventListener('focus', function() {
+            // Mostrar todas las opciones si no hay texto, o filtrar si lo hay
+            if (activeAutocomplete !== container) {
+                hidePortal();
+                showPortal(container, input.value);
+            }
+        });
+
+        input.addEventListener('input', function(e) {
+            showPortal(container, e.target.value);
+        });
+
+        input.addEventListener('blur', function() {
+            // Pequeño retraso para permitir que el mousedown en la opción se ejecute primero
+            setTimeout(function() {
+                if (activeAutocomplete === container) {
+                    hidePortal();
+                }
+            }, 150);
+        });
+
+        input.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                var firstItem = portal.querySelector('.option-item');
+                if (firstItem) {
+                    e.preventDefault();
+                    var id = firstItem.dataset.id;
+                    var label = firstItem.textContent;
+                    selectOption(container, label, id);
+                }
+            }
+        });
+    });
+
+    // Cerrar el portal si se hace clic fuera de cualquier autocomplete
+    document.addEventListener('click', function(e) {
+        if (activeAutocomplete && !activeAutocomplete.contains(e.target) && !portal.contains(e.target)) {
+            hidePortal();
+        }
+    });
+
+    // Recalcular posición al hacer scroll o redimensionar (por si la ventana se mueve)
+    window.addEventListener('scroll', function() {
+        if (activeAutocomplete) {
+            var input = activeAutocomplete.querySelector('.ciudad-input');
+            var rect = input.getBoundingClientRect();
+            portal.style.top = (rect.bottom + window.scrollY) + 'px';
+            portal.style.left = (rect.left + window.scrollX) + 'px';
+        }
+    }, true);
+
+    window.addEventListener('resize', function() {
+        if (activeAutocomplete) {
+            var input = activeAutocomplete.querySelector('.ciudad-input');
+            var rect = input.getBoundingClientRect();
+            portal.style.top = (rect.bottom + window.scrollY) + 'px';
+            portal.style.left = (rect.left + window.scrollX) + 'px';
+        }
+    });
+
+    // ============================================================
+    // 2. VALIDACIÓN AL ENVIAR (sin cambios)
+    // ============================================================
     document.getElementById('form-generar')?.addEventListener('submit', function (e) {
         var checks = document.querySelectorAll('.check-empleado:checked');
         var container = document.getElementById('validation-message-container');
@@ -816,9 +1031,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // =====================================================
-    // 3. SELECCIONAR TODOS LOS VISIBLES
-    // =====================================================
+    // ============================================================
+    // 3. SELECCIONAR TODOS LOS VISIBLES (sin cambios)
+    // ============================================================
     document.getElementById('seleccionar-todos')?.addEventListener('change', function (e) {
         var checked = e.target.checked;
         document.querySelectorAll('.check-empleado').forEach(function (cb) {
@@ -827,9 +1042,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // =====================================================
-    // 4. BÚSQUEDA EN LA TABLA
-    // =====================================================
+    // ============================================================
+    // 4. BÚSQUEDA EN LA TABLA (sin cambios)
+    // ============================================================
     var buscador = document.getElementById('buscador');
     var btnClear = document.getElementById('btn-clear');
 
@@ -849,9 +1064,9 @@ document.addEventListener('DOMContentLoaded', function () {
         buscador.focus();
     });
 
-    // =====================================================
-    // 5. RIPPLE EN SIDEBAR
-    // =====================================================
+    // ============================================================
+    // 5. RIPPLE EN SIDEBAR (sin cambios)
+    // ============================================================
     document.querySelectorAll('.sidebar-link').forEach(function (link) {
         link.addEventListener('click', function () {
             var r = document.createElement('span');
