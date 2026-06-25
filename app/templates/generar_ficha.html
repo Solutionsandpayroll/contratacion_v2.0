@@ -938,7 +938,7 @@
                 </div>
 
                 <div class="table-outer">
-                    <div class="table-scroll">
+                    <div class="table-scroll" id="table-scroll-container">
                         <table id="tabla-empleados">
                             <thead>
                                 <tr>
@@ -1029,7 +1029,32 @@
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 
 <script>
-    // Inicializar TomSelect
+    // ═══════════════════════════════════════════
+    // MEJORA 1: Evitar que la tabla haga scroll al inicio al hacer clic en TomSelect
+    // ═══════════════════════════════════════════
+    (function() {
+        const scrollContainer = document.getElementById('table-scroll-container');
+        let savedScrollTop = 0;
+
+        scrollContainer.addEventListener('mousedown', function(e) {
+            const tsControl = e.target.closest('.ts-control');
+            if (tsControl) {
+                savedScrollTop = scrollContainer.scrollTop;
+            }
+        });
+
+        document.addEventListener('focusin', function(e) {
+            if (e.target.closest('.ts-wrapper') && scrollContainer) {
+                requestAnimationFrame(() => {
+                    scrollContainer.scrollTop = savedScrollTop;
+                });
+            }
+        });
+    })();
+
+    // ═══════════════════════════════════════════
+    // MEJORA 2: Inicializar TomSelect con cierre automático al seleccionar
+    // ═══════════════════════════════════════════
     document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('.ciudad-select').forEach(function(sel) {
             if (sel.tomselect) return;
@@ -1042,13 +1067,16 @@
                     no_results: function() {
                         return '<div class="no-results">No se encontraron resultados</div>';
                     }
+                },
+                // Al añadir un item (hacer clic en una opción), fuerza el blur para mostrar el valor
+                onItemAdd: function() {
+                    this.blur();
                 }
             });
         });
     });
 
     // ---- VALIDACIÓN DEL FORMULARIO ----
-    // Asegura que al menos un empleado esté seleccionado antes de enviar
     document.getElementById('form-generar')?.addEventListener('submit', function(e) {
         const checks = document.querySelectorAll('.check-empleado:checked');
         const container = document.getElementById('validation-message-container');
@@ -1057,9 +1085,8 @@
         container.innerHTML = '';
 
         if (checks.length === 0) {
-            e.preventDefault(); // Evita el envío
+            e.preventDefault();
 
-            // Crear la alerta de error
             const alertDiv = document.createElement('div');
             alertDiv.className = 'alert-validation';
             alertDiv.innerHTML = `
@@ -1068,10 +1095,8 @@
             `;
             container.appendChild(alertDiv);
 
-            // Desplazarse suavemente hacia la alerta
             container.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-            // Eliminar la alerta automáticamente después de 5 segundos
             setTimeout(() => {
                 if (alertDiv.parentNode === container) {
                     container.removeChild(alertDiv);

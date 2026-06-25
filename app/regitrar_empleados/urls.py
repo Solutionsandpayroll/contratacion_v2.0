@@ -10,7 +10,7 @@ urlpatterns = [
     path('registrar-empleado/',empleados_view,name='empleados'),
 
     # URL DE LA VIEW DE CREACIÓN DE DOCUMENTOS
-    path('empleados/<str:id_empleado>/generar-documentos/',generar_documentos_empleado,name='generar_documentos_empleado'),
+    path('<str:id_empleado>/generar-documentos/',generar_documentos_empleado,name='generar_documentos_empleado'),
 
     # URL DE LA VIEW DE CREACION DE LA FICHA DE INGRESO
     path('generar-ficha/', generar_ficha_empleados, name='generar_ficha_empleados'),

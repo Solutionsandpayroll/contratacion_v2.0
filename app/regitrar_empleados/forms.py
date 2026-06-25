@@ -659,7 +659,7 @@ class CiudadQuickForm(forms.ModelForm):
     codigo_pais = forms.CharField(required=False)
     codigo_departamento = forms.CharField(required=False)
     codigo_dane = forms.CharField(required=False)
-    # nombre_ciudad permanece requerido (por defecto)
+    nombre_ciudad = forms.CharField(required=False)  # Ahora es opcional
 
     class Meta:
         model = Ciudad
@@ -672,7 +672,7 @@ class CiudadQuickForm(forms.ModelForm):
 
 class CentroCostoQuickForm(forms.ModelForm):
     codigo = forms.CharField(required=False)
-    # nombre permanece requerido
+    nombre = forms.CharField(required=False)  # Ahora es opcional
 
     class Meta:
         model = CentroCosto
@@ -685,7 +685,7 @@ class CentroCostoQuickForm(forms.ModelForm):
 
 class SubclienteQuickForm(forms.ModelForm):
     # codigo ya es opcional gracias a blank=True en el modelo
-    # nombre permanece requerido
+    nombre = forms.CharField(required=False)  # Ahora es opcional
 
     class Meta:
         model = Subcliente
@@ -698,12 +698,8 @@ class SubclienteQuickForm(forms.ModelForm):
     
 
 # --------------------------------------------------
-# Formulario (puedes ponerlo en forms.py aparte)
+# FORMULARIO PARA ENVÍO DE CORREOS
 # --------------------------------------------------
-from django import forms
-from django.core.exceptions import ValidationError
-
-from django import forms
 
 class MultipleFileInput(forms.ClearableFileInput):
     allow_multiple_selected = True

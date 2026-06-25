@@ -1205,6 +1205,62 @@
         font-weight: 600;
         color: var(--text-muted);
         }
+
+        /* ── BARRA DE BÚSQUEDA ── */
+        .search-wrapper {
+            position: relative;
+            flex: 1;
+            min-width: 220px;
+            max-width: 400px;
+        }
+        .search-wrapper .search-icon {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+        }
+        .search-wrapper input {
+            width: 100%;
+            height: var(--btn-h);
+            padding: 0 36px 0 40px;
+            border: 1.5px solid var(--color-border);
+            border-radius: var(--radius-sm);
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: .85rem;
+            font-weight: 600;
+            background: #f9fbfd;
+            color: var(--azul-oscuro);
+            transition: border-color .18s, box-shadow .18s;
+        }
+        .search-wrapper input:focus {
+            outline: none;
+            border-color: var(--azul-medio);
+            box-shadow: 0 0 0 3px rgba(16,87,136,.1);
+            background: var(--blanco);
+        }
+        .search-wrapper input::placeholder { color: var(--text-muted); font-weight: 600; }
+        .search-clear {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: .9rem;
+            cursor: pointer;
+            padding: 3px 5px;
+            border-radius: 4px;
+            display: none;
+            line-height: 1;
+            transition: color .15s;
+        }
+        .search-clear:hover { color: var(--text-secondary); }
+        .search-clear.visible { display: flex; align-items: center; }
     </style>
 </head>
 <body>
@@ -1283,6 +1339,15 @@
             </button>
         </div>
 
+        <!-- BARRA DE BÚSQUEDA -->
+        <div style="margin-bottom: 18px;">
+            <div class="search-wrapper">
+                <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" id="buscador" placeholder="Buscar por nombre o documento…" autocomplete="off">
+                <button class="search-clear" id="btn-clear" type="button" title="Limpiar"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+
         <div class="table-outer">
             <div class="table-scroll">
                 <table class="table table-hover align-middle">
@@ -1297,7 +1362,7 @@
                     </thead>
                     <tbody>
                         {% for empleado in empleados %}
-                            <tr>
+                            <tr data-nombre="{{ empleado.nombre_1 }} {{ empleado.primer_apellido }}" data-doc="{{ empleado.documento }}">
                                 <td>{{ empleado.tipo_doc|default:"-" }}</td>
                                 <td>{{ empleado.documento|default:"-" }}</td>
                                 <td>{{ empleado.nombre_1|default:"-" }}</td>
@@ -2150,6 +2215,24 @@
                 setTimeout(() => r.remove(), 520);
             });
         });
+
+        // ═══ BÚSQUEDA EN TABLA ═══
+        const buscador = document.getElementById('buscador');
+        const btnClear = document.getElementById('btn-clear');
+        buscador.addEventListener('input', function(e) {
+            const term = e.target.value.toLowerCase().trim();
+            btnClear.classList.toggle('visible', term.length > 0);
+            document.querySelectorAll('.table-scroll tbody tr').forEach(fila => {
+                const nombre = (fila.getAttribute('data-nombre') || '').toLowerCase();
+                const doc = (fila.getAttribute('data-doc') || '').toLowerCase();
+                fila.style.display = (nombre.includes(term) || doc.includes(term)) ? '' : 'none';
+            });
+        });
+        btnClear.addEventListener('click', function() {
+            buscador.value = '';
+            buscador.dispatchEvent(new Event('input'));
+            buscador.focus();
+        });
     });
 
     window.abrirModalDocs             = documentos.abrirModal.bind(documentos);
@@ -2165,7 +2248,6 @@
         quickAdd: { abrir: quickAdd.abrir.bind(quickAdd), cerrar: quickAdd.cerrar.bind(quickAdd), guardar: quickAdd.guardar.bind(quickAdd) },
         documentos: { quitarHW: documentos.quitarHW.bind(documentos) },
     };
-
 </script>
 </body>
 </html>
