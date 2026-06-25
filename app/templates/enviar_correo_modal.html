@@ -836,7 +836,7 @@ const plantillas = {
 function cargarPlantillaCorreo(idEstructura, nombre) {
   const p = plantillas[idEstructura];
   if (!p) return;
-  document.getElementById('asunto').value = p.asunto;
+  document.getElementById('asunto').value = p.asunto.replace(/{nombre}/g, nombre || '');
   const html = p.cuerpo.replace(/{nombre}/g, nombre || '');
   window.ceSetContent(html);
 }
