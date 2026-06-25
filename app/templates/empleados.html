@@ -2117,10 +2117,18 @@
             });
         },
         _insertarOpcion(id, text) {
-            const { parentModalEl, targetName } = qaState; if (!parentModalEl || !targetName) return;
-            const select = parentModalEl.querySelector(`[name="${targetName}"]`); if (!select) return;
-            if (select.tomselect) { select.tomselect.addOption({ value: String(id), text }); select.tomselect.setValue(String(id)); }
-            else select.appendChild(new Option(text, String(id), true, true));
+            const { parentModalEl, targetName } = qaState;
+            if (!parentModalEl || !targetName) return;
+            const select = parentModalEl.querySelector(`[name="${targetName}"]`);
+            if (!select) return;
+            // Agregar la opción al elemento <select> del DOM (para que persista tras reinicializar Tom Select)
+            const option = new Option(text, String(id), true, true);
+            select.appendChild(option);
+            // Si Tom Select ya está inicializado, añadir también a su instancia
+            if (select.tomselect) {
+                select.tomselect.addOption({ value: String(id), text });
+                select.tomselect.setValue(String(id));
+            }
         },
         async guardar(tipo) {
             const cfg = quickAddConfig[tipo]; if (!cfg) return;
