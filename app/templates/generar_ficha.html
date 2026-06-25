@@ -549,7 +549,7 @@
             overflow-x: auto;
             overflow-y: auto;
             flex: 1;
-            overflow-anchor: none; /* Añadido para evitar scroll-anchoring de Chrome */
+            overflow-anchor: none;
         }
         table {
             width: 100%;
@@ -1031,24 +1031,38 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
         // ==========================================
-        // 1. CORRECCIÓN DE TOM SELECT (Evita el salto al inicio de la tabla)
+        // 1. TOM SELECT – CORRECCIÓN DEL SCROLL
         // ==========================================
         const scrollContainer = document.getElementById('table-scroll-container');
 
         document.querySelectorAll('.ciudad-select').forEach(function(sel) {
             if (sel.tomselect) return;
 
-            let savedScrollTop = null;
-            let savedScrollLeft = null;
-            let lockScroll = false;
+            // Variables para guardar la posición del scroll
+            let savedScrollTop = 0;
+            let savedScrollLeft = 0;
 
-            function onScrollAttempt(e) {
-                if (lockScroll) {
+            // Función para guardar la posición actual
+            function saveScroll() {
+                if (scrollContainer) {
+                    savedScrollTop = scrollContainer.scrollTop;
+                    savedScrollLeft = scrollContainer.scrollLeft;
+                }
+            }
+
+            // Función para restaurar la posición guardada
+            function restoreScroll() {
+                if (scrollContainer) {
                     scrollContainer.scrollTop = savedScrollTop;
                     scrollContainer.scrollLeft = savedScrollLeft;
                 }
             }
+
+            // Guardamos la posición justo antes de que el navegador
+            // pueda hacer scroll al hacer clic en el control
+            sel.addEventListener('mousedown', saveScroll);
 
             let ts = new TomSelect(sel, {
                 create: false,
@@ -1061,41 +1075,32 @@
                     }
                 },
                 onItemAdd: function() {
-                    this.blur();
+                    restoreScroll();
+                    // A veces el scroll ocurre después, así que repetimos
+                    setTimeout(restoreScroll, 0);
+                    setTimeout(restoreScroll, 50);
                 },
                 onFocus: function() {
-                    savedScrollTop = scrollContainer.scrollTop;
-                    savedScrollLeft = scrollContainer.scrollLeft;
-                    lockScroll = true;
-                    scrollContainer.addEventListener('scroll', onScrollAttempt, { passive: false });
-
-                    [0, 16, 32, 48, 100].forEach(delay => {
-                        setTimeout(() => {
-                            if (savedScrollTop !== null) {
-                                scrollContainer.scrollTop = savedScrollTop;
-                                scrollContainer.scrollLeft = savedScrollLeft;
-                            }
-                        }, delay);
-                    });
+                    // Al enfocar, el navegador puede hacer scroll, así que guardamos
+                    // antes de cualquier cambio y restauramos inmediatamente
+                    saveScroll();
+                    setTimeout(restoreScroll, 0);
+                    setTimeout(restoreScroll, 50);
+                    setTimeout(restoreScroll, 100);
                 },
                 onDropdownOpen: function() {
-                    if (savedScrollTop !== null) {
-                        scrollContainer.scrollTop = savedScrollTop;
-                        scrollContainer.scrollLeft = savedScrollLeft;
-                    }
+                    restoreScroll();
+                    setTimeout(restoreScroll, 0);
+                    setTimeout(restoreScroll, 50);
                 },
                 onDropdownClose: function() {
-                    lockScroll = false;
-                    scrollContainer.removeEventListener('scroll', onScrollAttempt);
-                    if (savedScrollTop !== null) {
-                        scrollContainer.scrollTop = savedScrollTop;
-                        scrollContainer.scrollLeft = savedScrollLeft;
-                    }
-                    setTimeout(() => { savedScrollTop = null; savedScrollLeft = null; }, 100);
+                    restoreScroll();
+                    setTimeout(restoreScroll, 0);
+                    setTimeout(restoreScroll, 50);
                 },
                 onBlur: function() {
-                    lockScroll = false;
-                    scrollContainer.removeEventListener('scroll', onScrollAttempt);
+                    restoreScroll();
+                    setTimeout(restoreScroll, 0);
                 }
             });
         });
