@@ -20,7 +20,7 @@ SECRET = os.environ.get("GRAPH_CLIENT_SECRET")
 # Buzón/remitente desde el cual se envían los correos.
 # Debe ser un usuario válido del tenant (licenciado con Exchange Online) y la
 # app registrada debe tener permiso de aplicación Mail.Send sobre Graph.
-REMITENTE = "noreply@solutionsandpayroll.com"  # <-- ajusta esto si aplica
+REMITENTE = "vachury@solutionsandpayroll.com"  # <-- ajusta esto si aplica
 
 GRAPH_BASE = "https://graph.microsoft.com/v1.0"
 
