@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import *
 from .forms import *
 from .utils import *
+from .graph import enviar_correo_via_graph, REMITENTE
 import requests
 from django.conf import settings
 from django.utils import timezone
@@ -68,17 +69,13 @@ def parse_fecha(valor):
 ARCHIVO_FIJO_PATH   = os.path.join(settings.MEDIA_ROOT, 'Formato hoja de vida S&P_V03 (21).xlsx')
 ARCHIVO_FIJO_NOMBRE = 'Formato hoja de vida S&P_V03 (21).xlsx'
 ARCHIVO_FIJO_TIPO   = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
- 
-POWER_AUTOMATE_URL = (
-    "https://default90167654ed084e3d85e72724f8597c.cf.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/1d5bafd0be73439c832a1572bf02c68c/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=eWUzJm6iqj9SoxzcVOybR9_5y9n2fYgOsF9lbpmIc3g"
-)
- 
+
 MIME_A_EXT = {
     'image/jpeg':               '.jpg',
     'image/jpg':                '.jpg',
     'image/png':                '.png',
     'image/gif':                '.gif',
-    'image/webp':               '.webp',
+    'image/webp':                '.webp',
     'image/bmp':                '.bmp',
     'image/tiff':               '.tiff',
     'application/pdf':          '.pdf',
@@ -87,8 +84,8 @@ MIME_A_EXT = {
     'application/vnd.ms-excel': '.xls',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
 }
- 
- 
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # HELPERS
 # ─────────────────────────────────────────────────────────────────────────────
@@ -99,34 +96,34 @@ def _build_completo_form(emp):
     a partir del string almacenado.
     """
     initial = {}
- 
+
     # Ciudad de residencia
     if emp.ciudad_residencia:
         ciudad = Ciudad.from_str(emp.ciudad_residencia)
         if ciudad:
             initial['ciudad_residencia'] = ciudad.pk
- 
+
     # Lugar de nacimiento
     if emp.lugar_nacimiento:
         lugar = Ciudad.from_str(emp.lugar_nacimiento)
         if lugar:
             initial['lugar_nacimiento'] = lugar.pk
- 
+
     # Centro de costos
     if emp.centro_costos:
         centro = CentroCosto.from_str(emp.centro_costos)
         if centro:
             initial['centro_costos'] = centro.pk
- 
+
     # Subcliente
     if emp.subcliente:
         sub = Subcliente.from_str(emp.subcliente)
         if sub:
             initial['subcliente'] = sub.pk
- 
+
     return EmpleadoCompletoForm(instance=emp, initial=initial)
- 
- 
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # VISTA PRINCIPAL
 # ─────────────────────────────────────────────────────────────────────────────
@@ -460,6 +457,10 @@ def crear_subcliente_ajax(request):
 # ENVIAR CORREO A EMPLEADO
 @login_requerido
 def enviar_correo(request):
+    print("=" * 60)
+    print("[DEBUG] Entrando a enviar_correo() - method:", request.method)
+    print("=" * 60)
+
     if request.method != "POST":
         return redirect('empleados')
 
@@ -479,24 +480,37 @@ def enviar_correo(request):
         messages.error(request, "El asunto y el cuerpo del correo son obligatorios.")
         return redirect('empleados')
 
+    print(f"[DEBUG] asunto={asunto!r} cuerpo_html len={len(cuerpo_html)}")
+    print(f"[DEBUG] destinatario={empleado.email!r}")
+
     lista_adjuntos = []
     archivos = request.FILES.getlist("adjuntos")
     for archivo in archivos:
         lista_adjuntos.append(archivo_a_base64(archivo))
 
-    payload = {
-        "destinatario": empleado.email,
-        "estructura": estructura,
-        "asunto": asunto,
-        "cuerpo_html": cuerpo_html,
-        "adjuntos": lista_adjuntos
-    }
+    print("[DEBUG] Antes de llamar a Graph...")
 
-    respuesta = enviar_correo_via_power_automate(payload)
+    # ── Envío vía Microsoft Graph ──
+    try:
+        respuesta = enviar_correo_via_graph(
+            destinatario=empleado.email,
+            asunto=asunto,
+            cuerpo_html=cuerpo_html,
+            adjuntos=lista_adjuntos,
+        )
+        print(f"[GRAPH] status={respuesta.status_code} body={respuesta.text!r}")
+        print(f"[GRAPH] destinatario={empleado.email!r} remitente={REMITENTE}")
+    except requests.exceptions.RequestException as exc:
+        print(f"[GRAPH ERROR] Excepción capturada: {type(exc).__name__}: {exc}")
+        messages.error(request, f"Error de conexión con Microsoft Graph: {exc}")
+        return redirect('empleados')
+    except Exception as exc:
+        print(f"[GRAPH ERROR INESPERADO] {type(exc).__name__}: {exc}")
+        raise
 
-    if respuesta.status_code in [200, 202]:
+    if respuesta.status_code in (200, 202):
         messages.success(request, "Correo enviado correctamente.")
     else:
-        messages.error(request, f"Error {respuesta.status_code}")
+        messages.error(request, f"Error {respuesta.status_code}: {respuesta.text}")
 
     return redirect('empleados')
