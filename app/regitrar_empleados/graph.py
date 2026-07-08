@@ -12,13 +12,11 @@ import time
 import requests
 import os
 
-TENANT = "90167654-ed08-4e3d-85e7-2724f8597ccf"
-CLIENT = "b5689b17-292c-41ee-9a22-e1637361e832"
-SECRET = "X8b8Q~p3JItvzgAlqkK5vC-zicffnho55FqXxaq9"
 
-#ENANT = os.environ.get("GRAPH_TENANT_ID")
-#CLIENT = os.environ.get("GRAPH_CLIENT_ID")
-#SECRET = os.environ.get("GRAPH_CLIENT_SECRET")
+
+ENANT = os.environ.get("GRAPH_TENANT_ID")
+CLIENT = os.environ.get("GRAPH_CLIENT_ID")
+SECRET = os.environ.get("GRAPH_CLIENT_SECRET")
 
 # Buzón/remitente desde el cual se envían los correos.
 # Debe ser un usuario válido del tenant (licenciado con Exchange Online) y la
