@@ -19,6 +19,135 @@ import json
 
 from iniciar_sesion.decorators import login_requerido
 
+# ─────────────────────────────────────────────────────────────────────────────
+# CACHE DE CHOICES (evita N+1 consultas y cursores server-side)
+# ─────────────────────────────────────────────────────────────────────────────
+def _construir_choices_cache():
+    """
+    Obtiene UNA sola vez por request todos los registros de Ciudad, CentroCosto
+    y Subcliente, y construye:
+      - Listas de tuplas (pk, label) para usar como choices en los formularios.
+      - Diccionarios que mapean la representación string del objeto a su pk,
+        para resolver el initial de cada empleado completamente en memoria,
+        sin tener que volver a consultar la base de datos.
+    """
+    ciudades = list(Ciudad.objects.all())
+    centros  = list(CentroCosto.objects.all())
+    subs     = list(Subcliente.objects.all())
+
+    def _choices(objetos, empty_label='Selecciona o escribe...'):
+        opciones = [('', empty_label)]
+        opciones += [(str(o.pk), str(o)) for o in objetos]
+        return opciones
+
+    # Mapas string -> pk (en memoria)
+    ciudad_por_str = {str(c): c.pk for c in ciudades}
+    centro_por_str = {str(c): c.pk for c in centros}
+    sub_por_str    = {str(s): s.pk for s in subs}
+
+    return {
+        'choices': {
+            'ciudad_residencia':      _choices(ciudades),
+            'lugar_nacimiento':       _choices(ciudades),
+            'ciudad_exp_documento':    _choices(ciudades),
+            'centro_costos':          _choices(centros),
+            'subcliente':             _choices(subs),
+        },
+        'ciudad_por_str': ciudad_por_str,
+        'centro_por_str': centro_por_str,
+        'sub_por_str':    sub_por_str,
+    }
+
+
+def _aplicar_choices_cache(form, choices_cache):
+    """Sustituye el queryset lazy de cada ModelChoiceField por la lista
+    de choices ya materializada, para no volver a golpear la BD al renderizar."""
+    for nombre, choices in choices_cache['choices'].items():
+        if nombre in form.fields:
+            form.fields[nombre].choices = choices
+
+
+def _build_completo_form(emp, choices_cache=None):
+    """
+    Construye un EmpleadoCompletoForm para un empleado, rellenando los
+    campos ModelChoiceField con los objetos adecuados recuperados
+    a partir del string almacenado en el modelo.
+
+    Si se proporciona choices_cache (construido con _construir_choices_cache),
+    la resolución se hace totalmente en memoria usando los diccionarios
+    string->pk, evitando cualquier consulta adicional a la base de datos.
+    """
+    initial = {}
+
+    if choices_cache is not None:
+        # ── Resolución 100% en memoria ───────────────────────────────────
+        ciudad_map = choices_cache['ciudad_por_str']
+        centro_map = choices_cache['centro_por_str']
+        sub_map    = choices_cache['sub_por_str']
+
+        if emp.ciudad_residencia:
+            pk = ciudad_map.get(emp.ciudad_residencia.strip())
+            if pk:
+                initial['ciudad_residencia'] = pk
+
+        if emp.lugar_nacimiento:
+            pk = ciudad_map.get(emp.lugar_nacimiento.strip())
+            if pk:
+                initial['lugar_nacimiento'] = pk
+
+        if emp.ciudad_exp_documento:
+            pk = ciudad_map.get(emp.ciudad_exp_documento.strip())
+            if pk:
+                initial['ciudad_exp_documento'] = pk
+
+        if emp.centro_costos:
+            pk = centro_map.get(emp.centro_costos.strip())
+            if pk:
+                initial['centro_costos'] = pk
+
+        if emp.subcliente:
+            pk = sub_map.get(emp.subcliente.strip())
+            if pk:
+                initial['subcliente'] = pk
+
+    else:
+        # ── Fallback: comportamiento original con consultas por fila ─────
+        if emp.ciudad_residencia:
+            ciudad = Ciudad.from_str(emp.ciudad_residencia)
+            if ciudad:
+                initial['ciudad_residencia'] = ciudad.pk
+
+        if emp.lugar_nacimiento:
+            lugar = Ciudad.from_str(emp.lugar_nacimiento)
+            if lugar:
+                initial['lugar_nacimiento'] = lugar.pk
+
+        if emp.ciudad_exp_documento:
+            ciudad_exp = Ciudad.from_str(emp.ciudad_exp_documento)
+            if ciudad_exp:
+                initial['ciudad_exp_documento'] = ciudad_exp.pk
+
+        if emp.centro_costos:
+            centro = CentroCosto.from_str(emp.centro_costos)
+            if centro:
+                initial['centro_costos'] = centro.pk
+
+        if emp.subcliente:
+            sub = Subcliente.from_str(emp.subcliente)
+            if sub:
+                initial['subcliente'] = sub.pk
+
+    form = EmpleadoCompletoForm(instance=emp, initial=initial)
+
+    if choices_cache is not None:
+        _aplicar_choices_cache(form, choices_cache)
+
+    return form
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# OTRAS VISTAS
+# ─────────────────────────────────────────────────────────────────────────────
 @login_requerido
 def panel_admin_view(request):
 
@@ -84,44 +213,6 @@ MIME_A_EXT = {
     'application/vnd.ms-excel': '.xls',
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': '.xlsx',
 }
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# HELPERS
-# ─────────────────────────────────────────────────────────────────────────────
-def _build_completo_form(emp):
-    """
-    Construye un EmpleadoCompletoForm para un empleado, rellenando los
-    campos ModelChoiceField con los objetos adecuados recuperados
-    a partir del string almacenado.
-    """
-    initial = {}
-
-    # Ciudad de residencia
-    if emp.ciudad_residencia:
-        ciudad = Ciudad.from_str(emp.ciudad_residencia)
-        if ciudad:
-            initial['ciudad_residencia'] = ciudad.pk
-
-    # Lugar de nacimiento
-    if emp.lugar_nacimiento:
-        lugar = Ciudad.from_str(emp.lugar_nacimiento)
-        if lugar:
-            initial['lugar_nacimiento'] = lugar.pk
-
-    # Centro de costos
-    if emp.centro_costos:
-        centro = CentroCosto.from_str(emp.centro_costos)
-        if centro:
-            initial['centro_costos'] = centro.pk
-
-    # Subcliente
-    if emp.subcliente:
-        sub = Subcliente.from_str(emp.subcliente)
-        if sub:
-            initial['subcliente'] = sub.pk
-
-    return EmpleadoCompletoForm(instance=emp, initial=initial)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -226,12 +317,14 @@ def empleados_view(request):
                 mensaje_exito(request, 'Información completada correctamente')
                 return redirect('empleados')
             else:
+                # ── Cache de choices para los demás empleados ──
+                choices_cache = _construir_choices_cache()
                 empleados_list = list(empleados)
                 for emp in empleados_list:
                     if emp.id_empleado == empleado.id_empleado:
                         emp.form_completo = form_completo
                     else:
-                        emp.form_completo = _build_completo_form(emp)
+                        emp.form_completo = _build_completo_form(emp, choices_cache)
                 defaults = dict(EmpleadoCompletoForm.FIELD_DEFAULTS)
                 defaults.update(EmpleadoBasicoForm.FIELD_DEFAULTS)
                 field_defaults_json = json.dumps(defaults)
@@ -258,8 +351,9 @@ def empleados_view(request):
 
     # ─── CONSTRUCCIÓN DEL CONTEXTO PARA GET ───────────────────────────────
     empleados = list(empleados)
+    choices_cache = _construir_choices_cache()
     for emp in empleados:
-        emp.form_completo = _build_completo_form(emp)
+        emp.form_completo = _build_completo_form(emp, choices_cache)
 
     modal_crear_abierto  = form_basico.errors and not request.POST.get('id_empleado')
     modal_editar_abierto = form_basico.errors and request.POST.get('id_empleado')
@@ -352,17 +446,9 @@ def generar_ficha_empleados(request):
     else:
         empleados_qs = Empleado.objects.none()
 
-    grupos_sanguineos = ['A', 'B', 'AB', 'O']
-    factores_rh = ['+', '-']
-    sabados_habiles = [('0', '0 - Sábado no es hábil'), ('1', '1 - Sábado es hábil')]
-
     context = {
         'empleados': empleados_qs,
         'mes': mes,
-        'grupos_sanguineos': grupos_sanguineos,
-        'factores_rh': factores_rh,
-        'sabados_habiles': sabados_habiles,
-        'ciudades': Ciudad.objects.all(),          # ← Añadido
     }
 
     if request.method == 'POST':
@@ -373,35 +459,12 @@ def generar_ficha_empleados(request):
 
         empleados = Empleado.objects.filter(id_empleado__in=ids_seleccionados)
 
-        datos_extra = {}
-        for emp in empleados:
-            # Capturar el ID de ciudad enviado por el select
-            ciudad_exp_id = request.POST.get(f'ciudad_exp_id_{emp.id_empleado}', '')
-
-            # Obtener la representación completa de la ciudad (códigos + nombre)
-            ciudad_str = ''
-            if ciudad_exp_id:
-                try:
-                    ciudad_obj = Ciudad.objects.get(pk=ciudad_exp_id)
-                    ciudad_str = str(ciudad_obj)
-                except Ciudad.DoesNotExist:
-                    ciudad_str = ''
-
-            extra = {
-                'grupo_sanguineo': request.POST.get(f'grupo_sanguineo_{emp.id_empleado}', ''),
-                'factor_rh': request.POST.get(f'factor_rh_{emp.id_empleado}', ''),
-                'cargo': request.POST.get(f'cargo_{emp.id_empleado}', ''),
-                'sabado_habil': request.POST.get(f'sabado_habil_{emp.id_empleado}', '0'),
-                'ciudad_exp_id': ciudad_str,          # ← Guardamos el string completo
-            }
-            datos_extra[emp.id_empleado] = extra
-
         plantilla_path = os.path.join(settings.MEDIA_ROOT, 'FICHA DE INGRESO-copia.xlsx')
         if not os.path.exists(plantilla_path):
             messages.error(request, 'Plantilla no encontrada.')
             return render(request, 'generar_ficha.html', context)
 
-        excel_bytes = generar_excel_empleados(empleados, plantilla_path, datos_extra)
+        excel_bytes = generar_excel_empleados(empleados, plantilla_path)
         response = HttpResponse(
             excel_bytes.getvalue(),
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

@@ -31,6 +31,7 @@ sin_letras_validator = RegexValidator(
 TOMSELECT_FIELDS = {
     'ciudad_residencia',
     'lugar_nacimiento',
+    'ciudad_exp_documento',
     'centro_costos',
     'subcliente',
     'banco',
@@ -267,6 +268,32 @@ class EmpleadoCompletoForm(DefaultModelForm):
         initial='Soltero(a)', label='Estado Civil',
         widget=forms.Select(attrs={'class': 'form-select'}), required=False
     )
+    sexo = forms.ChoiceField(
+        choices=[('', 'Selecciona...')] + SEXO_CHOICES,
+        label='Sexo',
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    grupo_sanguineo = forms.ChoiceField(
+        choices=[('', 'Selecciona...'), ('A', 'A'), ('B', 'B'), ('AB', 'AB'), ('O', 'O')],
+        label='Grupo Sanguíneo',
+        widget=forms.Select(attrs={'class': 'form-select'}), required=False
+    )
+    factor_rh = forms.ChoiceField(
+        choices=[('', 'Selecciona...'), ('+', '+'), ('-', '-')],
+        label='Factor RH',
+        widget=forms.Select(attrs={'class': 'form-select'}), required=False
+    )
+    sabado_habil = forms.ChoiceField(
+        choices=[('0', '0 - Sábado no es hábil'), ('1', '1 - Sábado es hábil')],
+        initial='0', label='Sábado Hábil',
+        widget=forms.Select(attrs={'class': 'form-select'}), required=False
+    )
+    ciudad_exp_documento = CiudadChoiceField(
+        queryset=Ciudad.objects.all(), label='Ciudad Exp. Documento',
+        empty_label='Selecciona o escribe...',
+        widget=forms.Select(attrs={'class': 'form-select ciudad-select'}),
+        required=False,
+    )
 
     # ── Contacto y Residencia ────────────────────────────────────────────────
     ciudad_residencia = CiudadChoiceField(
@@ -460,7 +487,6 @@ class EmpleadoCompletoForm(DefaultModelForm):
     motivo_retiro               = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 3}), label='Motivo de Retiro')
     num_hijos                   = forms.IntegerField(min_value=0, required=False, widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}), label='Número de Hijos')
     personas_acargo             = forms.IntegerField(min_value=0, required=False, widget=forms.NumberInput(attrs={'class': 'form-control', 'min': '0'}), label='Personas a Cargo')
-    sexo = forms.ChoiceField(choices=[('', 'Selecciona...')] + SEXO_CHOICES, label='Sexo', widget=forms.Select(attrs={'class': 'form-select'}))
 
     class Meta:
         model = Empleado
@@ -468,7 +494,7 @@ class EmpleadoCompletoForm(DefaultModelForm):
             'id_empleado', 'tipo_doc', 'documento',
             'nombre_1', 'nombre_2', 'primer_apellido', 'segundo_apellido',
             'celular', 'email', 'estado', 'compania', 'fecha_registro',
-            'grupo_sanguineo', 'factor_rh', 'numero_contrato'
+            'numero_contrato'
         ]
 
     FIELD_DEFAULTS = {
@@ -502,16 +528,16 @@ class EmpleadoCompletoForm(DefaultModelForm):
         'tarjeta_credito':            'False',
         'equipo_computo':             'False',
         'vacaciones':                 '15',
+        'sabado_habil':               '0',
     }
 
     # ── Mapa: nombre_campo → (Modelo, atributo_en_instancia) ─────────────────
-    # Estos campos se guardan como string en el modelo pero son ModelChoiceField
-    # en el form. El __init__ los resuelve a PK para que el select se pre-rellene.
     _STRING_TO_FK = {
-        'ciudad_residencia': (Ciudad,      'ciudad_residencia'),
-        'lugar_nacimiento':  (Ciudad,      'lugar_nacimiento'),
-        'centro_costos':     (CentroCosto, 'centro_costos'),
-        'subcliente':        (Subcliente,  'subcliente'),
+        'ciudad_residencia':      (Ciudad,      'ciudad_residencia'),
+        'lugar_nacimiento':       (Ciudad,      'lugar_nacimiento'),
+        'ciudad_exp_documento':   (Ciudad,      'ciudad_exp_documento'),
+        'centro_costos':          (CentroCosto, 'centro_costos'),
+        'subcliente':             (Subcliente,  'subcliente'),
     }
 
     def __init__(self, *args, **kwargs):
@@ -530,12 +556,6 @@ class EmpleadoCompletoForm(DefaultModelForm):
                     self.fields[nombre].widget.attrs = {'class': 'form-select'}
 
         # ── RESOLVER STRING → PK ──────────────────────────────────────────────
-        # El modelo guarda ciudad_residencia / lugar_nacimiento / centro_costos /
-        # subcliente como CharField. Cuando Django hace super().__init__(instance=emp)
-        # copia ese string al campo, y el ModelChoiceField no lo reconoce como PK,
-        # dejando el <select> sin opción seleccionada (aunque sí renderiza el queryset).
-        # Aquí buscamos el objeto por __str__ y ponemos su PK en self.initial,
-        # que Django usa para renderizar el valor seleccionado en el widget.
         if self.instance and self.instance.pk:
             for field_name, (Model, attr) in self._STRING_TO_FK.items():
                 valor_str = getattr(self.instance, attr, None)
@@ -548,12 +568,6 @@ class EmpleadoCompletoForm(DefaultModelForm):
                         pass
 
             # ── SUELDO: forzar string ENTERO (sin .00) en el initial ──────────
-            # El modelo guarda 'sueldo' como Decimal (ej. 4500000.00). Si se deja
-            # tal cual, el template renderiza value="4500000.00" y el JS de
-            # formato de miles (formatoSueldo.formatear) interpreta el ".00"
-            # como parte del número, generando "450.000.000" en vez de
-            # "4.500.000". Por eso aquí se limpia a un entero plano antes de
-            # que llegue al widget.
             sueldo_raw = getattr(self.instance, 'sueldo', None)
             if sueldo_raw is not None:
                 try:
@@ -582,14 +596,10 @@ class EmpleadoCompletoForm(DefaultModelForm):
     def clean_sueldo(self):
         valor = self.cleaned_data.get('sueldo', '')
         if not valor: return None
-        # Se limpia cualquier separador de miles ('.') y se normaliza la coma
-        # decimal (',') a punto, por si el usuario escribe "4.500.000,50".
         limpio = str(valor).strip()
         if ',' in limpio and '.' in limpio:
-            # Formato "4.500.000,50" -> quitar puntos de miles, coma a punto
             limpio = limpio.replace('.', '').replace(',', '.')
         else:
-            # Sin coma decimal: cualquier punto presente es separador de miles
             limpio = limpio.replace('.', '').replace(',', '')
         if not limpio:
             return None
@@ -611,7 +621,7 @@ class EmpleadoCompletoForm(DefaultModelForm):
     def clean(self):
         return super().clean()
 
-    TEXT_FK_FIELDS = ['ciudad_residencia', 'lugar_nacimiento', 'centro_costos', 'subcliente']
+    TEXT_FK_FIELDS = ['ciudad_residencia', 'lugar_nacimiento', 'ciudad_exp_documento', 'centro_costos', 'subcliente']
 
     def save(self, commit=True):
         instance = super().save(commit=False)

@@ -1443,7 +1443,7 @@
                                                                 {% else %}<i class="fa-solid fa-circle-dot"></i>{% endif %}
                                                                 {{ field.label }}
                                                             </label>
-                                                            {% if field.name == 'ciudad_residencia' or field.name == 'lugar_nacimiento' %}
+                                                            {% if field.name == 'ciudad_residencia' or field.name == 'lugar_nacimiento' or field.name == 'ciudad_exp_documento' %}
                                                                 <div class="d-flex gap-2 align-items-start">
                                                                     <div class="flex-grow-1">{{ field }}</div>
                                                                     <button type="button" class="btn-quick-add" onclick="App.quickAdd.abrir('ciudad','{{ field.name }}',this)"><i class="fa-solid fa-plus"></i></button>

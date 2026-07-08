@@ -191,14 +191,14 @@ def crear_mapeo_columnas(datos_extra_dict):
         'AX': lambda e, ex: '0' if METODO_RETENCION_NUM_MAP.get(e.metodo_retencion, '0') == '1' else str(e.porcentaje_ret) if e.porcentaje_ret is not None else '0',
         'AY': lambda e, ex: formato_sueldo(e.sueldo),           # sueldo sin decimales
         'AZ': lambda e, ex: str(e.vacaciones) if e.vacaciones is not None else '15',
-        'BA': lambda e, ex: get_extra(e, 'sabado_habil', '0'),
+        'BA': lambda e, ex: get_extra(e, 'sabado_habil', e.sabado_habil or '0'),
         'BB': lambda e, ex: '0',
         'BC': lambda e, ex: e.cuenta_gastos or '',
         'BD': lambda e, ex: bool_a_01(e.variable),
         'BE': lambda e, ex: bool_a_01(e.pago_por_dias),
         'BF': lambda e, ex: MODO_LIQUIDACION_NUM_MAP.get(e.modo_liquidacion_conceptos, '0'),
-        'BG': lambda e, ex: extraer_codigo_pais(get_extra(e, 'ciudad_exp_id', '')),
-        'BH': lambda e, ex: extraer_codigo_ciudad(get_extra(e, 'ciudad_exp_id', '')),
+        'BG': lambda e, ex: extraer_codigo_pais(e.ciudad_exp_documento) if e.ciudad_exp_documento else '',
+        'BH': lambda e, ex: extraer_codigo_ciudad(e.ciudad_exp_documento) if e.ciudad_exp_documento else '',
         'BI': lambda e, ex: extraer_codigo_pais(e.lugar_nacimiento),
         'BJ': lambda e, ex: extraer_codigo_ciudad(e.lugar_nacimiento),
         'BK': lambda e, ex: extraer_codigo_pais(e.ciudad_residencia) if e.ciudad_residencia else '',
@@ -259,6 +259,7 @@ def crear_mapeo_columnas(datos_extra_dict):
         'DN': lambda e, ex: '0',
         'DO': lambda e, ex: '0',
         'DP': lambda e, ex: '0',
+        'DQ': lambda e, ex: e.subcliente or '',
     }
     return MAPEO
 

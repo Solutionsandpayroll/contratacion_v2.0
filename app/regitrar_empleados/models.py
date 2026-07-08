@@ -28,6 +28,8 @@ class Empleado(models.Model):
     sexo = models.CharField(max_length=5, null=True, blank=True)
     grupo_sanguineo = models.CharField(max_length=10, null=True, blank=True)
     factor_rh = models.CharField(max_length=5, null=True, blank=True)
+    sabado_habil = models.CharField(max_length=1, null=True, blank=True, default='0')
+    ciudad_exp_documento = models.CharField(max_length=200, null=True, blank=True)
 
     estado_civil = models.CharField(max_length=20, null=True, blank=True)
 
