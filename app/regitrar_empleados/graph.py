@@ -14,7 +14,7 @@ import os
 
 
 
-ENANT = os.environ.get("GRAPH_TENANT_ID")
+TENANT = os.environ.get("GRAPH_TENANT_ID")
 CLIENT = os.environ.get("GRAPH_CLIENT_ID")
 SECRET = os.environ.get("GRAPH_CLIENT_SECRET")
 
