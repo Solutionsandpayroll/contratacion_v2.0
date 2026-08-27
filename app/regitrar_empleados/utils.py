@@ -563,6 +563,18 @@ def archivo_a_base64(archivo: UploadedFile) -> dict:
     }
 
 
+def archivo_disco_a_base64(ruta_archivo: str, nombre: str = None, tipo: str = None) -> dict:
+    import mimetypes
+    with open(ruta_archivo, 'rb') as f:
+        contenido_bytes = f.read()
+    contenido_b64 = base64.b64encode(contenido_bytes).decode("utf-8")
+    return {
+        "nombre": nombre or os.path.basename(ruta_archivo),
+        "contenido": contenido_b64,
+        "tipo": tipo or mimetypes.guess_type(ruta_archivo)[0] or "application/octet-stream",
+    }
+
+
 def enviar_correo_via_power_automate(payload: dict):
 
     url = settings.POWER_AUTOMATE_URL

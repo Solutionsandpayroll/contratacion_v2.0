@@ -7,6 +7,7 @@
         {% csrf_token %}
         <input type="hidden" name="accion" value="enviar">
         <input type="hidden" name="id_empleado" id="correo-id-empleado">
+        <input type="hidden" name="compania" id="correo-compania">
 
         <!-- HEADER -->
         <div class="correo-header">
@@ -79,6 +80,7 @@
                 <input type="file" name="adjuntos" id="adjuntos" multiple style="display:none;">
               </div>
               <ul id="fileList" class="correo-file-list"></ul>
+              <input type="hidden" name="incluir_formato_hoja_vida" id="incluir-formato-hoja-vida" value="0">
             </div>
 
           </div>
@@ -465,6 +467,25 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.correo-file-list li.fijo {
+  background: rgba(16,87,136,.06);
+  border-color: var(--azul-medio);
+  border-style: dashed;
+}
+.correo-file-list li.fijo i.fa-file {
+  color: var(--azul-oscuro);
+}
+.correo-file-list li.fijo .file-badge {
+  font-size: .6rem;
+  font-weight: 800;
+  color: var(--azul-medio);
+  background: rgba(16,87,136,.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  flex-shrink: 0;
+}
 .remove-file {
   cursor: pointer;
   color: var(--rojo);
@@ -800,7 +821,7 @@ const plantillas = {
     asunto: "Solicitud documentación proceso de Vinculación - {nombre}",
     cuerpo: `<p>Buen día, {nombre}</p>
 <p>Reciba un cordial saludo,</p>
-<p>Mi nombre es Viviana Achury y le escribo en representación de Solutions & Payroll. Hemos recibido la solicitud por parte de (EMPRESA), para presentarnos y darle a conocer los detalles relativos al proceso de su vinculación.</p>
+<p>Mi nombre es Viviana Achury y le escribo en representación de Solutions & Payroll. Hemos recibido la solicitud por parte de {empresa}, para presentarnos y darle a conocer los detalles relativos al proceso de su vinculación.</p>
 <p>Le agradecemos nos haga llegar los siguientes documentos, los cuales son requeridos para el proceso de contratación:</p>
 <ul><li>Formato hoja de vida S&P</li></ul>
 <p>Adicionalmente, le solicitamos nos confirme su disponibilidad para comunicarnos por llamada telefónica o, si lo prefiere, por WhatsApp, con el fin de coordinar el agendamiento de los exámenes médicos requeridos para el ingreso.</p>
@@ -815,36 +836,46 @@ const plantillas = {
   }
 };
 
-function cargarPlantillaCorreo(idEstructura, nombre) {
+function cargarPlantillaCorreo(idEstructura, nombre, compania) {
   const p = plantillas[idEstructura];
   if (!p) return;
   document.getElementById('asunto').value = p.asunto.replace(/{nombre}/g, nombre || '');
-  const html = p.cuerpo.replace(/{nombre}/g, nombre || '');
+  const html = p.cuerpo.replace(/{nombre}/g, nombre || '').replace(/{empresa}/g, compania || '');
   window.ceSetContent(html);
 }
 
-function abrirModalCorreo(idEmpleado, nombreCompleto, email) {
+function abrirModalCorreo(idEmpleado, nombreCompleto, email, compania) {
   document.getElementById('correo-id-empleado').value = idEmpleado;
   document.getElementById('correo-nombre').value = nombreCompleto || '';
   document.getElementById('correo-email').value = email || '';
+  document.getElementById('correo-compania').value = compania || '';
 
-  if (typeof selectedFiles !== 'undefined') { selectedFiles = []; updateFileInputAndList(); }
+  if (typeof selectedFiles !== 'undefined') { selectedFiles = []; }
 
   document.getElementById('estructura').value = '1';
-  cargarPlantillaCorreo('1', nombreCompleto);
+  cargarPlantillaCorreo('1', nombreCompleto, compania);
+  activarArchivoFijo();
 
   new bootstrap.Modal(document.getElementById('modalEnviarCorreo')).show();
 }
 
 document.getElementById('estructura').addEventListener('change', function() {
-  cargarPlantillaCorreo(this.value, document.getElementById('correo-nombre').value);
+  cargarPlantillaCorreo(this.value, document.getElementById('correo-nombre').value, document.getElementById('correo-compania').value);
+  if (this.value === '1') {
+    activarArchivoFijo();
+  } else {
+    desactivarArchivoFijo();
+  }
 });
 
 const dropZone   = document.getElementById('dropZone');
 const fileInput  = document.getElementById('adjuntos');
 const fileList   = document.getElementById('fileList');
 const uploadText = document.getElementById('uploadText');
+const incluirFormatoHidden = document.getElementById('incluir-formato-hoja-vida');
 let selectedFiles = [];
+let archivoFijoActivo = false;
+const ARCHIVO_FIJO_NOMBRE = 'Formato hoja de vida S&P_V03 (21).xlsx';
 
 dropZone.addEventListener('click', () => fileInput.click());
 fileInput.addEventListener('change', handleFiles);
@@ -872,17 +903,39 @@ function updateFileInputAndList() {
 }
 function renderFileList() {
   fileList.innerHTML = '';
+  if (archivoFijoActivo) {
+    const liFijo = document.createElement('li');
+    liFijo.className = 'fijo';
+    liFijo.innerHTML = `<i class="fa-solid fa-file-excel"></i><span class="file-name-text">${ARCHIVO_FIJO_NOMBRE}</span><span class="file-badge">Incluido</span><span class="remove-file" id="remove-fijo"><i class="fa-solid fa-xmark"></i></span>`;
+    fileList.appendChild(liFijo);
+    document.getElementById('remove-fijo').addEventListener('click', e => {
+      e.stopPropagation();
+      archivoFijoActivo = false;
+      incluirFormatoHidden.value = '0';
+      renderFileList();
+    });
+  }
   selectedFiles.forEach((file, i) => {
     const li = document.createElement('li');
     li.innerHTML = `<i class="fa-solid fa-file"></i><span class="file-name-text">${file.name}</span><span class="remove-file" data-index="${i}"><i class="fa-solid fa-xmark"></i></span>`;
     fileList.appendChild(li);
   });
-  fileList.querySelectorAll('.remove-file').forEach(btn => {
+  fileList.querySelectorAll('.remove-file[data-index]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
       selectedFiles.splice(+btn.dataset.index, 1);
       updateFileInputAndList();
     });
   });
+}
+function activarArchivoFijo() {
+  archivoFijoActivo = true;
+  incluirFormatoHidden.value = '1';
+  renderFileList();
+}
+function desactivarArchivoFijo() {
+  archivoFijoActivo = false;
+  incluirFormatoHidden.value = '0';
+  renderFileList();
 }
 </script>

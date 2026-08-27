@@ -538,6 +538,8 @@ def enviar_correo(request):
     nombre_completo = f"{empleado.nombre_1} {empleado.primer_apellido}".strip()
     asunto = asunto.replace("{nombre}", nombre_completo)
     cuerpo_html = cuerpo_html.replace("{nombre}", nombre_completo)
+    asunto = asunto.replace("{empresa}", empleado.compania or "")
+    cuerpo_html = cuerpo_html.replace("{empresa}", empleado.compania or "")
 
     if not asunto or not cuerpo_html:
         messages.error(request, "El asunto y el cuerpo del correo son obligatorios.")
@@ -547,8 +549,14 @@ def enviar_correo(request):
     print(f"[DEBUG] destinatario={empleado.email!r}")
 
     lista_adjuntos = []
-    archivos = request.FILES.getlist("adjuntos")
-    for archivo in archivos:
+    incluir_formato = request.POST.get("incluir_formato_hoja_vida") == "1"
+    archivos_usuario = request.FILES.getlist("adjuntos")
+    usuario_reemplazo = any(f.name == ARCHIVO_FIJO_NOMBRE for f in archivos_usuario)
+
+    if estructura == "1" and incluir_formato and not usuario_reemplazo and os.path.exists(ARCHIVO_FIJO_PATH):
+        lista_adjuntos.append(archivo_disco_a_base64(ARCHIVO_FIJO_PATH, ARCHIVO_FIJO_NOMBRE, ARCHIVO_FIJO_TIPO))
+
+    for archivo in archivos_usuario:
         lista_adjuntos.append(archivo_a_base64(archivo))
 
     print("[DEBUG] Antes de llamar a Graph...")
